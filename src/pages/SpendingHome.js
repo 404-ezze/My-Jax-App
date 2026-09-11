@@ -18,7 +18,6 @@ import {
   FiInbox,
   FiEye,
   FiEyeOff,
-  FiTrendingUp,
   FiArrowUpRight,
   FiArrowDownLeft
 } from 'react-icons/fi';

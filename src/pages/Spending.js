@@ -17,54 +17,6 @@ import {
 } from 'react-icons/fi';
 import { createWorker } from 'tesseract.js';
 
-// --- PRA-PEMROSESAN GAMBAR (PEMBERSIHAN BAYANGAN & PENAJAMAN TEKS STRUK) ---
-const optimizeReceiptCanvas = (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        let width = img.width;
-        let height = img.height;
-        const maxLimit = 1600;
-
-        if (width > maxLimit || height > maxLimit) {
-          if (width > height) {
-            height = Math.round((height * maxLimit) / width);
-            width = maxLimit;
-          } else {
-            width = Math.round((width * maxLimit) / height);
-            height = maxLimit;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Grayscale alami dengan peregangan kontras linier
-        const imgData = ctx.getImageData(0, 0, width, height);
-        const d = imgData.data;
-        for (let i = 0; i < d.length; i += 4) {
-          const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-          const factor = 1.25;
-          const adjusted = Math.min(255, Math.max(0, factor * (gray - 128) + 128));
-          d[i] = adjusted;
-          d[i + 1] = adjusted;
-          d[i + 2] = adjusted;
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.95);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-};
 
 export default function Spending({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({

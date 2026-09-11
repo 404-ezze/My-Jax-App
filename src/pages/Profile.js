@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   FiUser, 
   FiMail, 
-  FiKey, 
   FiEye, 
   FiEyeOff, 
   FiEdit3, 
@@ -10,8 +9,7 @@ import {
   FiX, 
   FiCheck,
   FiLock,
-  FiShield,
-  FiChevronRight
+  FiShield
 } from 'react-icons/fi';
 
 // Ornamen Grafis Latar
