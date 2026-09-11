@@ -3,7 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
   FiMenu, 
-  FiHome, 
+  FiHome,         // <-- PASTIKAN INI ADA
   FiBriefcase, 
   FiBell, 
   FiArrowRight, 
@@ -261,7 +261,7 @@ const ProgressTileGraphic = () => (
 
 // --- KOMPONEN UTAMA DASHBOARD ---
 function Dashboard() {
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const currentYear = now.getFullYear();
   const currentMonthName = NAMA_BULAN[now.getMonth()];
   const currentDayName = NAMA_HARI[now.getDay()];
@@ -269,14 +269,10 @@ function Dashboard() {
 
   const formattedHeaderDate = `${currentDayName}, ${currentDateNum} ${currentMonthName} ${currentYear}`;
 
-  // State Data Database Real-time
   const [tasksList, setTasksList] = useState([]);
   const [spendingList, setSpendingList] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
 
-  // Ambil data Tasks & Spending dari API Google Apps Script
   useEffect(() => {
-    setLoadingData(true);
     const fetchTasksPromise = fetch(`${API_URL}?sheetName=Tasks`)
       .then(res => res.json())
       .then(resData => {
@@ -316,7 +312,6 @@ function Dashboard() {
     Promise.all([fetchTasksPromise, fetchSpendingPromise]).then(([tasksData, spendingData]) => {
       setTasksList(tasksData);
       setSpendingList(spendingData);
-      setLoadingData(false);
     });
   }, []);
 
@@ -337,7 +332,6 @@ function Dashboard() {
     });
   }, []);
 
-  // 1. Data Agenda Hari Ini & Tugas Prioritas
   const todayTasks = useMemo(() => {
     const todayStr = new Date().toISOString().split('T')[0];
     const matchToday = tasksList.filter(item => {
@@ -362,7 +356,6 @@ function Dashboard() {
     return tasksList.filter(item => String(item[5] || '').toLowerCase() !== 'completed').slice(0, 3);
   }, [tasksList]);
 
-  // 2. Data Finansial Bulan Berjalan & Perbandingan 4 Bulan
   const currentMonthExpense = useMemo(() => {
     const curYear = now.getFullYear();
     const curMonth = now.getMonth();
@@ -374,7 +367,7 @@ function Dashboard() {
         return d.getFullYear() === curYear && d.getMonth() === curMonth;
       })
       .reduce((acc, curr) => acc + Number(curr[5] || 0), 0);
-  }, [spendingList]);
+  }, [spendingList, now]);
 
   const lastMonthExpense = useMemo(() => {
     const dTarget = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -388,7 +381,7 @@ function Dashboard() {
         return d.getFullYear() === targetYear && d.getMonth() === targetMonth;
       })
       .reduce((acc, curr) => acc + Number(curr[5] || 0), 0);
-  }, [spendingList]);
+  }, [spendingList, now]);
 
   const expenseDiffText = useMemo(() => {
     if (lastMonthExpense === 0) return 'Perhitungan pengeluaran bulan ini';
@@ -399,7 +392,6 @@ function Dashboard() {
     return `↑ ${Math.round(diff)}% dari bulan lalu`;
   }, [currentMonthExpense, lastMonthExpense]);
 
-  // Diagram 4 Bulan Terakhir
   const monthlyBars = useMemo(() => {
     const list = [];
     for (let i = 3; i >= 0; i--) {
@@ -425,9 +417,8 @@ function Dashboard() {
       else if (idx === 1) color = '#E2E8F0';
       return { m: item.m, h: `${heightPx}px`, c: color };
     });
-  }, [spendingList]);
+  }, [spendingList, now]);
 
-  // 3. Data Progres Mingguan (Tasks Minggu Ini & Tabungan)
   const weeklyTaskProgress = useMemo(() => {
     const today = new Date();
     const startOfWeek = new Date(today);
@@ -468,10 +459,10 @@ function Dashboard() {
     const saved = monthIncome - currentMonthExpense;
     if (saved <= 0) return 0;
     return Math.min(Math.round((saved / monthIncome) * 100), 100);
-  }, [spendingList, currentMonthExpense]);
+  }, [spendingList, currentMonthExpense, now]);
 
   return (
-    <div style={{ maxWidth: '1040px', margin: '0 auto', paddingBottom: '55px', background: 'transparent' }}>
+    <div style={{ maxWidth: '1040px', margin: '0 auto', paddingBottom: '60px', background: 'transparent' }}>
       
       {/* 1. HERO HEADER GRAFIS */}
       <div style={{
