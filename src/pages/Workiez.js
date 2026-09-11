@@ -6,12 +6,7 @@ import {
   FiCheck, 
   FiCheckCircle, 
   FiRotateCcw, 
-  FiCalendar, 
-  FiFileText, 
-  FiLoader,
-  FiBriefcase,
-  FiLink,
-  FiActivity
+  FiLoader
 } from 'react-icons/fi';
 
 export default function Workiez({ isOpen, onClose, onSuccess }) {
@@ -165,7 +160,7 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
     let posisiVal = '';
     let companyVal = '';
 
-    if (lower.includes('di ')) {
+    if (lower.includes(' di ')) {
       const parts = text.split(/ di /i);
       posisiVal = parts[0].replace(/apply|lamar|sebagai/gi, '').trim();
       companyVal = parts[1] ? parts[1].trim() : '';
@@ -186,136 +181,160 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
 
   return (
     <>
+      {/* Modal Form Tambah Lamaran Minimalis */}
       <div style={modalOverlayStyle}>
-        <div style={{ ...modalBoxStyle, maxWidth: '520px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ ...modalBoxStyle, maxWidth: '440px' }}>
+          
+          {/* Header Modal */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#0F172A' }}>
-                Catat Lamaran Kerja Baru
+              <div style={{
+                display: 'inline-block',
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#D97706',
+                fontSize: '10px',
+                fontWeight: '600',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.4px',
+                marginBottom: '6px'
+              }}>
+                Entry Karir
+              </div>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '600', color: '#1E1B4B', letterSpacing: '-0.3px' }}>
+                Catat Lamaran Kerja
               </h3>
-              <span style={{ fontSize: '12px', color: '#64748B' }}>Dokumentasikan aplikasi loker untuk memantau status seleksi.</span>
+              <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '400' }}>
+                Dokumentasikan aplikasi loker baru ke MyJAX
+              </span>
             </div>
-            <button onClick={onClose} style={iconCloseBtnStyle}>
-              <FiX size={17} />
-            </button>
-          </div>
 
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-            <button type="button" onClick={() => { setRecognizedText(''); setShowVoiceModal(true); }} style={toolActionBtnStyle}>
-              <FiMic size={14} />
-              <span>Input Cepat Lewat Suara</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button 
+                type="button" 
+                onClick={() => { setRecognizedText(''); setShowVoiceModal(true); }}
+                style={{
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  color: '#D97706',
+                  border: 'none',
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title="Input via suara"
+              >
+                <FiMic size={13} />
+                <span>Suara</span>
+              </button>
+
+              <button onClick={onClose} style={iconCloseBtnStyle}>
+                <FiX size={16} />
+              </button>
+            </div>
           </div>
 
           {formError && (
-            <div style={{ marginBottom: '14px', padding: '8px 12px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', color: '#991B1B', fontSize: '12px' }}>
+            <div style={{ marginBottom: '14px', padding: '8px 12px', background: '#FEF2F2', borderRadius: '8px', color: '#991B1B', fontSize: '11px', fontWeight: '500' }}>
               {formError}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            {/* Nama Perusahaan & Posisi */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
               <div>
-                <label style={formLabelStyle}>Nama Perusahaan *</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiBriefcase size={14} /></span>
-                  <input 
-                    type="text" 
-                    name="perusahaan" 
-                    placeholder="Contoh: PT Pelindo" 
-                    value={formData.perusahaan} 
-                    onChange={handleChange} 
-                    style={{ ...formInputStyle, paddingLeft: '34px', fontWeight: '600' }} 
-                    required
-                  />
-                </div>
+                <label style={formLabelStyle}>Perusahaan *</label>
+                <input 
+                  type="text" 
+                  name="perusahaan" 
+                  placeholder="Misal: Pelindo" 
+                  value={formData.perusahaan} 
+                  onChange={handleChange} 
+                  style={{ ...formInputStyle, fontWeight: '700' }} 
+                  required
+                />
               </div>
 
               <div>
                 <label style={formLabelStyle}>Posisi / Role *</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiFileText size={14} /></span>
-                  <input 
-                    type="text" 
-                    name="posisi" 
-                    placeholder="Contoh: Frontend Developer" 
-                    value={formData.posisi} 
-                    onChange={handleChange} 
-                    style={{ ...formInputStyle, paddingLeft: '34px', fontWeight: '600' }} 
-                    required
-                  />
-                </div>
+                <input 
+                  type="text" 
+                  name="posisi" 
+                  placeholder="Misal: IT Staff" 
+                  value={formData.posisi} 
+                  onChange={handleChange} 
+                  style={{ ...formInputStyle, fontWeight: '700' }} 
+                  required
+                />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            {/* Tanggal Apply & Status Awal */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
               <div>
                 <label style={formLabelStyle}>Tanggal Apply *</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiCalendar size={14} /></span>
-                  <input 
-                    type="date" 
-                    name="tanggal" 
-                    value={formData.tanggal} 
-                    onChange={handleChange} 
-                    style={{ ...formInputStyle, paddingLeft: '34px' }} 
-                    required
-                  />
-                </div>
+                <input 
+                  type="date" 
+                  name="tanggal" 
+                  value={formData.tanggal} 
+                  onChange={handleChange} 
+                  style={formInputStyle} 
+                  required
+                />
               </div>
 
               <div>
                 <label style={formLabelStyle}>Status Awal</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiActivity size={14} /></span>
-                  <select name="status" value={formData.status} onChange={handleChange} style={{ ...formInputStyle, paddingLeft: '34px' }}>
-                    <option value="Applied">Applied (Terkirim)</option>
-                    <option value="Screening">Screening (CV Review)</option>
-                    <option value="Interview">Interview</option>
-                    <option value="Offering">Offering</option>
-                    <option value="Accepted">Accepted (Diterima)</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                </div>
+                <select name="status" value={formData.status} onChange={handleChange} style={formInputStyle}>
+                  <option value="Applied">Applied (Terkirim)</option>
+                  <option value="Screening">Screening (Review CV)</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Offering">Offering</option>
+                  <option value="Accepted">Accepted (Diterima)</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
               </div>
             </div>
 
+            {/* Link Lowongan */}
             <div style={{ marginBottom: '14px' }}>
-              <label style={formLabelStyle}>Link Lowongan Kerja (Opsional)</label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiLink size={14} /></span>
-                <input 
-                  type="text" 
-                  name="linkLoker" 
-                  placeholder="Contoh: linkedin.com/jobs/..." 
-                  value={formData.linkLoker} 
-                  onChange={handleChange} 
-                  style={{ ...formInputStyle, paddingLeft: '34px' }} 
-                />
-              </div>
+              <label style={formLabelStyle}>Tautan Lowongan (Opsional)</label>
+              <input 
+                type="text" 
+                name="linkLoker" 
+                placeholder="Contoh: linkedin.com/jobs/..." 
+                value={formData.linkLoker} 
+                onChange={handleChange} 
+                style={formInputStyle} 
+              />
             </div>
 
+            {/* Catatan Tambahan */}
             <div style={{ marginBottom: '18px' }}>
-              <label style={formLabelStyle}>Catatan Tambahan</label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiFileText size={14} /></span>
-                <input 
-                  type="text" 
-                  name="catatan" 
-                  placeholder="Contoh: Submit via website resmi karir" 
-                  value={formData.catatan} 
-                  onChange={handleChange} 
-                  style={{ ...formInputStyle, paddingLeft: '34px' }} 
-                />
-              </div>
+              <label style={formLabelStyle}>Catatan (Opsional)</label>
+              <input 
+                type="text" 
+                name="catatan" 
+                placeholder="Contoh: Melalui portal karir perusahaan" 
+                value={formData.catatan} 
+                onChange={handleChange} 
+                style={formInputStyle} 
+              />
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+            {/* Tombol Aksi */}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
               <button type="button" onClick={onClose} style={modalCancelBtnStyle}>
                 Batal
               </button>
               <button type="submit" disabled={formSubmitting} style={modalSubmitBtnStyle}>
-                {formSubmitting ? <FiLoader className="spin" size={14} /> : <FiCheck size={14} />}
+                {formSubmitting ? <FiLoader className="spin" size={13} /> : <FiCheck size={13} />}
                 <span>{formSubmitting ? 'Menyimpan...' : 'Simpan Lamaran'}</span>
               </button>
             </div>
@@ -326,17 +345,19 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
       {/* Pop-up Voice Command */}
       {showVoiceModal && (
         <div style={{ ...modalOverlayStyle, zIndex: 10000 }}>
-          <div style={modalBoxStyle}>
+          <div style={{ ...modalBoxStyle, maxWidth: '380px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#0F172A' }}>Perintah Suara Lamaran</h3>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#1E1B4B' }}>
+                {isRecording ? 'Mendengarkan...' : 'Perintah Suara'}
+              </h3>
               <button onClick={() => { if (isRecording && recognitionRef.current) recognitionRef.current.stop(); setShowVoiceModal(false); }} style={iconCloseBtnStyle}>
-                <FiX size={17} />
+                <FiX size={15} />
               </button>
             </div>
 
-            <p style={{ margin: '0 0 16px 0', fontSize: '12px', color: '#64748B' }}>{voiceStatus}</p>
+            <p style={{ margin: '0 0 14px 0', fontSize: '11px', color: '#64748B' }}>{voiceStatus}</p>
 
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginBottom: '14px', display: 'flex', justifyContent: 'center' }}>
               <button 
                 type="button" 
                 onMouseDown={startHoldingRecord}
@@ -344,28 +365,38 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
                 onTouchStart={startHoldingRecord}
                 onTouchEnd={stopHoldingRecord}
                 style={{ 
-                  background: isRecording ? '#DC2626' : '#1E293B', 
-                  color: '#FFFFFF', border: 'none', padding: '12px 20px', 
-                  borderRadius: '12px', fontSize: '13px', fontWeight: '600', 
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                  userSelect: 'none', WebkitUserSelect: 'none'
+                  background: isRecording ? '#DC2626' : 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)', 
+                  color: isRecording ? '#FFFFFF' : '#F59E0B', 
+                  border: isRecording ? 'none' : '1px solid rgba(245, 158, 11, 0.4)', 
+                  padding: '10px 20px', 
+                  borderRadius: '12px', 
+                  fontSize: '12px', 
+                  fontWeight: '600', 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  userSelect: 'none', 
+                  WebkitUserSelect: 'none', 
+                  fontFamily: 'Poppins, sans-serif',
+                  boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)'
                 }}
               >
-                <FiMic size={16} /> {isRecording ? 'Merekam... Lepas untuk Selesai' : 'Tahan untuk Bicara'}
+                <FiMic size={14} /> {isRecording ? 'Merekam... Lepas jika Selesai' : 'Tahan untuk Bicara'}
               </button>
             </div>
 
-            <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', minHeight: '50px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '500', color: '#0F172A', fontStyle: recognizedText ? 'normal' : 'italic' }}>
-                {recognizedText ? `"${recognizedText}"` : 'Tahan tombol dan ucapkan, misal: "Apply Frontend Dev di Pelindo"'}
+            <div style={{ backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '10px', border: '1px solid #E2E8F0', minHeight: '44px', marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: '500', color: '#1E293B', fontStyle: recognizedText ? 'normal' : 'italic', textAlign: 'center' }}>
+                {recognizedText ? `"${recognizedText}"` : 'Tahan tombol dan ucapkan, misal: "Lamar Software Engineer di Google"'}
               </p>
             </div>
 
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
               <button type="button" onClick={() => setRecognizedText('')} style={modalCancelBtnStyle}>
-                <FiRotateCcw size={13} /> Reset
+                <FiRotateCcw size={12} /> Reset
               </button>
-              <button type="button" onClick={handleApplyVoiceData} disabled={!recognizedText} style={{ ...modalSubmitBtnStyle, opacity: recognizedText ? 1 : 0.5 }}>
+              <button type="button" onClick={handleApplyVoiceData} disabled={!recognizedText} style={{ ...modalSubmitBtnStyle, opacity: recognizedText ? 1 : 0.6 }}>
                 Terapkan
               </button>
             </div>
@@ -373,26 +404,26 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
         </div>
       )}
 
-      {/* Pop-up Sukses */}
+      {/* Pop-up Berhasil */}
       {showSuccessModal && (
         <div style={{ ...modalOverlayStyle, zIndex: 10001 }}>
-          <div style={{ ...modalBoxStyle, textAlign: 'center', padding: '28px 24px' }}>
-            <div style={{ display: 'inline-flex', background: '#DCFCE7', color: '#16A34A', padding: '12px', borderRadius: '50%', marginBottom: '12px' }}>
-              <FiCheckCircle size={28} />
+          <div style={{ ...modalBoxStyle, maxWidth: '340px', textAlign: 'center', padding: '26px 20px' }}>
+            <div style={{ display: 'inline-flex', background: '#DCFCE7', color: '#16A34A', padding: '10px', borderRadius: '50%', marginBottom: '10px' }}>
+              <FiCheckCircle size={26} />
             </div>
             
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: '600', color: '#0F172A' }}>
-              Lamaran Berhasil Dicatat
-            </h3>
-            <p style={{ margin: '0 0 16px 0', fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
-              Riwayat lamaran berhasil tersimpan rapi ke spreadsheet.
+            <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '600', color: '#1E1B4B' }}>
+              Lamaran Tersimpan
+            </h4>
+            <p style={{ margin: '0 0 14px 0', fontSize: '11px', color: '#64748B', lineHeight: '1.4' }}>
+              Riwayat aplikasi lamaran berhasil dicatat ke spreadsheet.
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
               <img 
                 src="/image/successjax.png" 
                 alt="Sukses" 
-                style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '12px' }} 
+                style={{ maxWidth: '100%', maxHeight: '130px', objectFit: 'contain', borderRadius: '10px' }} 
               />
             </div>
 
@@ -401,7 +432,7 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
                 setShowSuccessModal(false);
                 onClose();
               }} 
-              style={{ ...modalSubmitBtnStyle, width: '100%', justifyContent: 'center' }}
+              style={{ ...modalSubmitBtnStyle, width: '100%', justifyContent: 'center', padding: '9px 16px' }}
             >
               Selesai
             </button>
@@ -412,48 +443,93 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
   );
 }
 
+// Styling Terintegrasi & Minimalis (Tema Ungu & Kuning)
 const modalOverlayStyle = {
-  position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-  background: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(4px)',
-  display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999, padding: '16px'
+  position: 'fixed', 
+  top: 0, 
+  left: 0, 
+  width: '100vw', 
+  height: '100vh',
+  background: 'rgba(30, 27, 75, 0.55)', 
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
+  display: 'flex', 
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  zIndex: 9999, 
+  padding: '16px'
 };
 
 const modalBoxStyle = {
-  background: '#FFFFFF', borderRadius: '18px', padding: '22px',
-  width: '100%', maxWidth: '390px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-  fontFamily: 'Poppins, sans-serif', boxSizing: 'border-box'
+  background: '#FFFFFF', 
+  borderRadius: '20px', 
+  padding: '22px',
+  width: '100%', 
+  boxShadow: '0 20px 35px -10px rgba(30, 27, 75, 0.25)',
+  fontFamily: 'Poppins, sans-serif', 
+  boxSizing: 'border-box',
+  border: '1px solid #E2E8F0'
 };
 
 const iconCloseBtnStyle = {
-  background: '#F8FAFC', border: '1px solid #E2E8F0', cursor: 'pointer',
-  padding: '6px', display: 'flex', alignItems: 'center', borderRadius: '8px', color: '#64748B'
-};
-
-const toolActionBtnStyle = {
-  flex: 1, background: '#F8FAFC', border: '1px solid #E2E8F0',
-  padding: '8px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '500',
-  color: '#334155', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+  background: '#F8FAFC', 
+  border: '1px solid #E2E8F0', 
+  cursor: 'pointer',
+  padding: '6px', 
+  display: 'flex', 
+  alignItems: 'center', 
+  borderRadius: '8px', 
+  color: '#64748B'
 };
 
 const formLabelStyle = {
-  display: 'block', fontSize: '11px', fontWeight: '600',
-  color: '#475569', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.3px'
+  display: 'block', 
+  fontSize: '10px', 
+  fontWeight: '600',
+  color: '#1E1B4B', 
+  marginBottom: '4px', 
+  textTransform: 'uppercase', 
+  letterSpacing: '0.3px'
 };
 
 const formInputStyle = {
-  width: '100%', padding: '8px 12px', borderRadius: '10px',
-  border: '1px solid #CBD5E1', fontSize: '12px', outline: 'none',
-  boxSizing: 'border-box', fontFamily: 'Poppins, sans-serif', background: '#F8FAFC', color: '#0F172A'
+  width: '100%', 
+  padding: '8px 10px', 
+  borderRadius: '8px',
+  border: '1px solid #CBD5E1', 
+  fontSize: '12px', 
+  outline: 'none',
+  boxSizing: 'border-box', 
+  fontFamily: 'Poppins, sans-serif', 
+  background: '#F8FAFC', 
+  color: '#1E293B',
+  fontWeight: '500'
 };
 
 const modalCancelBtnStyle = {
-  padding: '8px 14px', background: '#F1F5F9', border: 'none', borderRadius: '10px',
-  fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer',
+  padding: '8px 14px', 
+  background: '#F1F5F9', 
+  border: 'none', 
+  borderRadius: '8px',
+  fontSize: '11px', 
+  fontWeight: '500', 
+  color: '#475569', 
+  cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif'
 };
 
 const modalSubmitBtnStyle = {
-  padding: '8px 16px', background: '#0F172A', border: 'none', borderRadius: '10px',
-  fontSize: '12px', fontWeight: '600', color: '#FFFFFF', cursor: 'pointer',
-  fontFamily: 'Poppins, sans-serif', display: 'flex', alignItems: 'center', gap: '6px'
+  padding: '8px 16px', 
+  background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
+  border: 'none', 
+  borderRadius: '8px',
+  fontSize: '11px', 
+  fontWeight: '600', 
+  color: '#1E1B4B', 
+  cursor: 'pointer',
+  fontFamily: 'Poppins, sans-serif', 
+  display: 'flex', 
+  alignItems: 'center', 
+  gap: '6px',
+  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)'
 };

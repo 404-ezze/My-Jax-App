@@ -2,25 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { API_URL } from '../App';
 import Workiez from './Workiez';
 import { 
-  FiBriefcase, 
   FiChevronLeft, 
   FiChevronRight, 
   FiPlus, 
   FiSearch, 
   FiCalendar, 
   FiLoader, 
-  FiCheckCircle, 
   FiClock, 
   FiInbox, 
   FiSend, 
   FiExternalLink, 
   FiUserCheck, 
   FiEdit2, 
-  FiAlertTriangle, 
+  FiAlertCircle, 
   FiX, 
   FiCheck, 
   FiFileText, 
-  FiActivity 
+  FiActivity,
+  FiAward
 } from 'react-icons/fi';
 
 const MONTH_NAMES = [
@@ -28,7 +27,6 @@ const MONTH_NAMES = [
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
-// Parser Tanggal Murni (DD-MM-YYYY)
 const formatDateDisplay = (rawDate) => {
   if (!rawDate) return '-';
   const d = new Date(rawDate);
@@ -41,27 +39,89 @@ const formatDateDisplay = (rawDate) => {
   return `${day}-${month}-${year}`;
 };
 
+// --- TILE GRAFIS MODUL WORKIEZ (DUOTONE APPS STYLE) ---
+const WorkiezHeaderTile = () => (
+  <div style={{
+    width: '44px',
+    height: '44px',
+    borderRadius: '14px',
+    background: 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-8px', right: '-8px', width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.35)' }} />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="7" width="18" height="13" rx="3" fill="#FFFFFF" />
+      <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke="#FFFFFF" strokeWidth="2" />
+      <rect x="10.5" y="10.5" width="3" height="3" rx="1" fill="#F59E0B" />
+    </svg>
+  </div>
+);
+
+const PipelineTileGraphic = () => (
+  <div style={{
+    width: '38px',
+    height: '38px',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 3px 8px rgba(30, 27, 75, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.35)' }} />
+    <FiSend size={16} color="#FFFFFF" />
+  </div>
+);
+
+const InterviewTileGraphic = () => (
+  <div style={{
+    width: '38px',
+    height: '38px',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 3px 8px rgba(217, 119, 6, 0.3)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(30, 27, 75, 0.15)' }} />
+    <FiUserCheck size={18} color="#1E1B4B" />
+  </div>
+);
+
 export default function WorkiezHome() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State Navigasi Tanggal & Periode
+  // Navigasi Tanggal
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [periodType, setPeriodType] = useState('month');
   
-  // State Filter & Search Tabel
+  // Filter & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
 
-  // State Pagination
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // State Pop-up Form Tambah
+  // Modal Form
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // State Modal Edit Status
+  // Modal Edit Status
   const [editingItem, setEditingItem] = useState(null);
   const [editStatus, setEditStatus] = useState('Applied');
   const [editCatatan, setEditCatatan] = useState('');
@@ -129,7 +189,6 @@ export default function WorkiezHome() {
     setCurrentPage(1);
   };
 
-  // Cek jika lamaran sudah >= 30 hari tanpa kabar
   const checkIsOverdue = (applyDate, status) => {
     if (!applyDate) return false;
     const d = new Date(applyDate);
@@ -147,7 +206,6 @@ export default function WorkiezHome() {
     return applications.filter(item => checkIsOverdue(item[1], item[5]));
   }, [applications]);
 
-  // Filter Periode
   const periodApplications = useMemo(() => {
     return applications.filter(item => {
       if (!item || !item[1]) return false;
@@ -170,7 +228,6 @@ export default function WorkiezHome() {
     });
   }, [applications, selectedDate, periodType]);
 
-  // Metrik KPI
   const totalApplied = periodApplications.length;
 
   const totalInReview = useMemo(() => {
@@ -234,13 +291,13 @@ export default function WorkiezHome() {
       sheetName: 'Workiez',
       id: editingItem[0],
       rowData: [
-        editingItem[0],    // [0] ID
-        editingItem[1],    // [1] Tanggal_Apply
-        editingItem[2],    // [2] Nama_Perusahaan
-        editingItem[3],    // [3] Posisi
-        editingItem[4],    // [4] Link_Loker
-        editStatus,        // [5] Status
-        editCatatan || '-' // [6] Catatan
+        editingItem[0],
+        editingItem[1],
+        editingItem[2],
+        editingItem[3],
+        editingItem[4],
+        editStatus,
+        editCatatan || '-'
       ]
     };
 
@@ -269,15 +326,16 @@ export default function WorkiezHome() {
     const s = String(statusName || '').toLowerCase();
     let bg = '#F1F5F9';
     let text = '#475569';
+    let icon = <FiClock size={11} />;
 
     if (s === 'accepted' || s === 'offering') {
-      bg = '#D1FAE5'; text = '#065F46';
+      bg = '#DCFCE7'; text = '#15803D'; icon = <FiAward size={11} />;
     } else if (s === 'interview') {
-      bg = '#FEF3C7'; text = '#92400E';
+      bg = '#F3E8FF'; text = '#7C3AED'; icon = <FiUserCheck size={11} />;
     } else if (s === 'screening' || s === 'applied') {
-      bg = '#E0F2FE'; text = '#0369A1';
+      bg = 'rgba(46, 49, 146, 0.08)'; text = '#2E3192'; icon = <FiClock size={11} />;
     } else if (s === 'rejected') {
-      bg = '#FEE2E2'; text = '#991B1B';
+      bg = '#FEE2E2'; text = '#991B1B'; icon = <FiX size={11} />;
     }
 
     return (
@@ -287,23 +345,27 @@ export default function WorkiezHome() {
         padding: '3px 8px', 
         borderRadius: '6px', 
         fontSize: '11px', 
-        fontWeight: '600'
+        fontWeight: '600', 
+        display: 'inline-flex', 
+        alignItems: 'center', 
+        gap: '4px' 
       }}>
+        {icon}
         {statusName || 'Applied'}
       </span>
     );
   };
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', color: '#1E293B', fontFamily: 'Poppins, sans-serif' }}>
+    <div style={{ maxWidth: '1040px', margin: '0 auto', fontFamily: 'Poppins, sans-serif', paddingBottom: '70px' }}>
       
-      {/* CSS Responsif Khusus WorkiezHome */}
       <style>{`
-        .kpi-grid-container {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          margin-bottom: 22px;
+        .job-card-item {
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+        }
+        .job-card-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(30, 27, 75, 0.05);
         }
 
         .filter-controls-container {
@@ -313,127 +375,186 @@ export default function WorkiezHome() {
           width: 100%;
         }
 
-        .filter-dropdowns-row {
+        .filter-dropdowns-row-workiez {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 8px;
+          gap: 10px;
           width: 100%;
         }
 
         @media (min-width: 641px) {
-          .kpi-grid-container {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-          }
           .filter-controls-container {
             flex-direction: row;
             align-items: center;
-            justify-content: flex-end;
+            justifyContent: flex-end;
             width: auto;
           }
-          .filter-dropdowns-row {
+          .filter-dropdowns-row-workiez {
             display: flex;
             width: auto;
           }
         }
       `}</style>
 
-      {/* Header Utama */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
-            <div style={{ background: '#F1F5F9', color: '#334155', padding: '8px', borderRadius: '10px', display: 'flex' }}>
-              <FiBriefcase size={20} />
-            </div>
-            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.3px' }}>
-              Job Tracker Hub
-            </h1>
-          </div>
-          <p style={{ margin: 0, fontSize: '12px', color: '#64748B', fontWeight: '400' }}>
-            Pantau status seleksi lamaran kerja, jadwal wawancara, dan tawaran offering.
-          </p>
-        </div>
+      {/* 1. HERO BANNER UNGU MEMPHIS DENGAN AKSEN KUNING */}
+      <div style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 45%, #4338CA 100%)',
+        padding: '24px 20px 65px 20px',
+        color: '#FFFFFF',
+        overflow: 'hidden'
+      }}>
+        <svg style={{ position: 'absolute', top: '16px', right: '20px', opacity: 0.85, pointerEvents: 'none' }} width="75" height="24" viewBox="0 0 80 20" fill="none">
+          <path d="M2 10 Q 12 0, 22 10 T 42 10 T 62 10 T 78 10" stroke="#F59E0B" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+        </svg>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', maxWidth: '200px' }}>
-          <button 
-            onClick={() => setIsFormOpen(true)}
-            style={{
-              width: '100%',
-              background: '#0F172A', 
-              color: '#FFFFFF', 
-              border: 'none',
-              padding: '9px 16px', 
-              borderRadius: '12px', 
-              fontSize: '12px', 
+        <div style={{
+          position: 'absolute',
+          top: '-20px',
+          right: '90px',
+          width: '90px',
+          height: '90px',
+          borderRadius: '50%',
+          border: '3px solid #F59E0B',
+          opacity: 0.35,
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', position: 'relative', zIndex: 2 }}>
+          <div>
+            <div style={{
+              display: 'inline-block',
+              background: '#F59E0B',
+              color: '#1E1B4B',
+              fontSize: '10px',
               fontWeight: '600',
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '6px',
-              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.12)'
-            }}
-          >
-            <FiPlus size={15} />
-            <span>Tambah Lamaran</span>
-          </button>
+              padding: '3px 10px',
+              borderRadius: '20px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.6px',
+              marginBottom: '10px',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)'
+            }}>
+              Career Tracker
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <WorkiezHeaderTile />
+              <div>
+                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', letterSpacing: '-0.4px', lineHeight: '1.2' }}>
+                  Job Tracker
+                </h1>
+                <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: '400' }}>
+                  Pantau tahapan seleksi karir, jadwal wawancara, dan hasil lamaran kerja.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', maxWidth: '210px' }}>
+            <button 
+              onClick={() => setIsFormOpen(true)}
+              style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
+                color: '#1E1B4B', 
+                border: 'none',
+                padding: '10px 16px', 
+                borderRadius: '12px', 
+                fontSize: '12px', 
+                fontWeight: '600', 
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: '6px',
+                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)',
+                transition: 'transform 0.18s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <FiPlus size={16} />
+              <span>Tambah Lamaran</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Banner Peringatan Follow-up */}
-      {overdueApplications.length > 0 && (
+      {/* 2. LEMBAR KONTEN PUTIH ELEGAN (OVERLAPPING TRAY) */}
+      <div style={{
+        marginTop: '-35px',
+        background: '#FFFFFF',
+        borderTopLeftRadius: '32px',
+        borderTopRightRadius: '32px',
+        padding: '24px 18px',
+        boxShadow: '0 -10px 28px rgba(15, 23, 42, 0.04)',
+        position: 'relative',
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '22px'
+      }}>
+
+        {/* Banner Peringatan Bersih */}
+        {overdueApplications.length > 0 && (
+          <div style={{
+            background: '#F8FAFC',
+            border: '1px solid #CBD5E1',
+            borderRadius: '14px',
+            padding: '12px 14px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '10px',
+            boxShadow: '0 2px 6px rgba(30, 27, 75, 0.02)'
+          }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#D97706', padding: '6px', borderRadius: '8px', display: 'flex', marginTop: '2px', flexShrink: 0 }}>
+              <FiAlertCircle size={15} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 2px 0', fontSize: '12px', fontWeight: '600', color: '#1E1B4B' }}>
+                Perlu Follow-up: {overdueApplications.length} Lamaran Belum Ada Kabar (&ge; 30 Hari)
+              </h4>
+              <p style={{ margin: 0, fontSize: '11px', color: '#64748B', lineHeight: '1.4', fontWeight: '400' }}>
+                Aplikasi di <strong style={{ color: '#1E293B', fontWeight: '600' }}>{overdueApplications.map(a => a[2]).slice(0, 3).join(', ')}{overdueApplications.length > 3 ? '...' : ''}</strong> sudah berjalan lebih dari 1 bulan tanpa pembaruan.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Navigasi Periode Bergaya Modern */}
         <div style={{
-          background: '#FFFBEB',
-          border: '1px solid #FDE68A',
-          borderRadius: '14px',
-          padding: '12px 14px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'flex-start',
+          background: '#F8FAFC', 
+          border: '1px solid #E2E8F0', 
+          borderRadius: '16px',
+          padding: '10px 14px', 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
           gap: '10px'
         }}>
-          <div style={{ background: '#FEF3C7', color: '#D97706', padding: '6px', borderRadius: '8px', display: 'flex', marginTop: '2px', flexShrink: 0 }}>
-            <FiAlertTriangle size={16} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h4 style={{ margin: '0 0 2px 0', fontSize: '12px', fontWeight: '700', color: '#92400E' }}>
-              Perhatian: {overdueApplications.length} Lamaran Belum Ada Kabar (&ge; 30 Hari)
-            </h4>
-            <p style={{ margin: 0, fontSize: '11px', color: '#B45309', lineHeight: '1.4' }}>
-              Lamaran di <strong>{overdueApplications.map(a => a[2]).slice(0, 3).join(', ')}{overdueApplications.length > 3 ? '...' : ''}</strong> belum ada update lebih dari 1 bulan.
-            </p>
-          </div>
-        </div>
-      )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button onClick={handlePrevPeriod} style={navIconBtnStyle} title="Periode Sebelumnya">
+              <FiChevronLeft size={16} />
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px', fontWeight: '600', fontSize: '12px', color: '#1E1B4B' }}>
+              <FiCalendar size={14} color="#F59E0B" />
+              <span>
+                {periodType === 'month' 
+                  ? `${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
+                  : `Minggu ${Math.ceil(selectedDate.getDate() / 7)}, ${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
+                }
+              </span>
+            </div>
 
-      {/* Bar Navigasi Tanggal */}
-      <div style={{
-        background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '16px',
-        padding: '10px 14px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', flexWrap: 'wrap', gap: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <button onClick={handlePrevPeriod} style={navIconBtnStyle} title="Periode Sebelumnya">
-            <FiChevronLeft size={16} />
-          </button>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 6px', fontWeight: '600', fontSize: '12px', color: '#0F172A' }}>
-            <FiCalendar size={14} color="#64748B" />
-            <span>
-              {periodType === 'month' 
-                ? `${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
-                : `Mgg ${Math.ceil(selectedDate.getDate() / 7)}, ${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
-              }
-            </span>
+            <button onClick={handleNextPeriod} style={navIconBtnStyle} title="Periode Berikutnya">
+              <FiChevronRight size={16} />
+            </button>
           </div>
 
-          <button onClick={handleNextPeriod} style={navIconBtnStyle} title="Periode Berikutnya">
-            <FiChevronRight size={16} />
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div style={{ display: 'flex', background: '#F1F5F9', padding: '3px', borderRadius: '10px' }}>
+          <div style={{ display: 'flex', background: '#E2E8F0', padding: '3px', borderRadius: '10px' }}>
             <button 
               onClick={() => { setPeriodType('month'); setCurrentPage(1); }}
               style={periodType === 'month' ? activeTabBtnStyle : inactiveTabBtnStyle}
@@ -448,358 +569,417 @@ export default function WorkiezHome() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* 4 Kartu Metrik KPI (2x2 di Mobile) */}
-      <div className="kpi-grid-container">
-        
-        {/* Card 1: Total Lamaran */}
-        <div style={{ ...metricCardBase, borderLeft: '4px solid #334155' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <span style={metricLabelStyle}>Total Lamaran</span>
-              <div style={metricValueStyle}>
-                {totalApplied} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Aplikasi</span>
+        {/* --- DUO CARD: PIPELINE SELEKSI & TAHAPAN WAWANCARA --- */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '14px' }}>
+          
+          {/* Kartu 1: Pipeline Lamaran Masuk & Review Screening */}
+          <div style={{
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '18px',
+            padding: '16px 18px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '14px',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <PipelineTileGraphic />
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#1E1B4B', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  Pipeline Lamaran
+                </span>
+              </div>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: '600',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                background: 'rgba(46, 49, 146, 0.08)',
+                color: '#2E3192'
+              }}>
+                {totalApplied} Aplikasi
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '12px', borderTop: '1px solid #E2E8F0', paddingTop: '10px' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: '#2E3192', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2E3192' }}></span>
+                  Tahap Screening
+                </span>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1E293B', marginTop: '3px', letterSpacing: '-0.3px' }}>
+                  {totalInReview} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Aplikasi</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#64748B', marginTop: '2px', display: 'block' }}>
+                  Menunggu respon HR
+                </span>
+              </div>
+
+              <div>
+                <span style={{ fontSize: '11px', color: '#475569', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#94A3B8' }}></span>
+                  Total Terkirim
+                </span>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1E293B', marginTop: '3px', letterSpacing: '-0.3px' }}>
+                  {totalApplied} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Berkas</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#64748B', marginTop: '2px', display: 'block' }}>
+                  Periode terpilih
+                </span>
               </div>
             </div>
-            <div style={{ background: '#F1F5F9', color: '#334155', padding: '7px', borderRadius: '10px', display: 'flex' }}>
-              <FiSend size={15} />
-            </div>
           </div>
-          <div style={{ marginTop: '8px', fontSize: '10px', color: '#64748B', fontWeight: '500' }}>
-            Periode aktif terpilih
-          </div>
-        </div>
 
-        {/* Card 2: Tahap Screening */}
-        <div style={{ ...metricCardBase, borderLeft: '4px solid #0284C7' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <span style={{ ...metricLabelStyle, color: '#0369A1' }}>Screening</span>
-              <div style={metricValueStyle}>
-                {totalInReview} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Review</span>
+          {/* Kartu 2: Progres Wawancara & Hasil Offering */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.03) 0%, rgba(46, 49, 146, 0.05) 100%)',
+            border: '1px solid #CBD5E1',
+            borderRadius: '18px',
+            padding: '16px 18px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '14px',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <InterviewTileGraphic />
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#1E1B4B', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  Tahapan Seleksi Lanjut
+                </span>
+              </div>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: '600',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                background: totalAccepted > 0 ? '#DCFCE7' : '#F1F5F9',
+                color: totalAccepted > 0 ? '#15803D' : '#475569'
+              }}>
+                {totalAccepted > 0 ? `${totalAccepted} Lolos Seleksi` : 'Berjalan Aktif'}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '12px', borderTop: '1px solid rgba(226, 232, 240, 0.8)', paddingTop: '10px' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: '#7C3AED', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#7C3AED' }}></span>
+                  Sesi Wawancara
+                </span>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1E293B', marginTop: '3px', letterSpacing: '-0.3px' }}>
+                  {totalInterview} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Sesi</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#64748B', marginTop: '2px', display: 'block' }}>
+                  User / HR interview
+                </span>
+              </div>
+
+              <div>
+                <span style={{ fontSize: '11px', color: '#15803D', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16A34A' }}></span>
+                  Offering / Diterima
+                </span>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#15803D', marginTop: '3px', letterSpacing: '-0.3px' }}>
+                  {totalAccepted} <span style={{ fontSize: '11px', fontWeight: '500', color: '#15803D' }}>Tawaran</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#64748B', marginTop: '2px', display: 'block' }}>
+                  Penawaran kerja
+                </span>
               </div>
             </div>
-            <div style={{ background: '#E0F2FE', color: '#0284C7', padding: '7px', borderRadius: '10px', display: 'flex' }}>
-              <FiClock size={15} />
-            </div>
           </div>
-          <div style={{ marginTop: '8px', fontSize: '10px', color: '#075985', fontWeight: '500' }}>
-            Menunggu respon HR
-          </div>
+
         </div>
 
-        {/* Card 3: Tahap Interview */}
-        <div style={{ ...metricCardBase, borderLeft: '4px solid #D97706' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* Kontainer Daftar Riwayat Lamaran */}
+        <div style={{ 
+          background: '#FFFFFF', 
+          border: '1px solid #E2E8F0', 
+          borderRadius: '18px', 
+          padding: '18px', 
+          boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)' 
+        }}>
+          
+          {/* Header Seksi & Kontrol Filter */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
             <div>
-              <span style={{ ...metricLabelStyle, color: '#92400E' }}>Interview</span>
-              <div style={metricValueStyle}>
-                {totalInterview} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Sesi</span>
+              <h2 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '600', color: '#1E1B4B' }}>
+                Riwayat Aplikasi Lamaran
+              </h2>
+              <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '400' }}>
+                Rekapitulasi berkas lamaran yang dikirim pada periode aktif.
+              </span>
+            </div>
+
+            {/* Form Filter Responsif */}
+            <div className="filter-controls-container">
+              <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+                <FiSearch size={14} color="#94A3B8" style={{ position: 'absolute', left: '12px' }} />
+                <input 
+                  type="text" 
+                  placeholder="Cari perusahaan atau posisi..." 
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px 9px 34px', 
+                    borderRadius: '10px', 
+                    border: '1px solid #CBD5E1', 
+                    fontSize: '12px', 
+                    outline: 'none', 
+                    background: '#F8FAFC', 
+                    color: '#1E293B',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: '500',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div className="filter-dropdowns-row-workiez">
+                <select 
+                  value={selectedCompany} 
+                  onChange={(e) => { setSelectedCompany(e.target.value); setCurrentPage(1); }}
+                  style={filterSelectResponsiveStyle}
+                >
+                  <option value="ALL">Semua Perusahaan</option>
+                  {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+
+                <select 
+                  value={selectedStatus} 
+                  onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
+                  style={filterSelectResponsiveStyle}
+                >
+                  <option value="ALL">Semua Status</option>
+                  <option value="Applied">Applied (Terkirim)</option>
+                  <option value="Screening">Screening (Review)</option>
+                  <option value="Interview">Interview (Wawancara)</option>
+                  <option value="Offering">Offering</option>
+                  <option value="Accepted">Accepted (Diterima)</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
               </div>
             </div>
-            <div style={{ background: '#FEF3C7', color: '#D97706', padding: '7px', borderRadius: '10px', display: 'flex' }}>
-              <FiUserCheck size={15} />
+          </div>
+
+          {/* Konten Data */}
+          {loading ? (
+            <div style={{ padding: '50px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '12px' }}>
+              <FiLoader className="spin" size={16} color="#F59E0B" />
+              <span>Memuat catatan lamaran karir...</span>
             </div>
-          </div>
-          <div style={{ marginTop: '8px', fontSize: '10px', color: '#78350F', fontWeight: '500' }}>
-            Tahap wawancara
-          </div>
-        </div>
-
-        {/* Card 4: Diterima */}
-        <div style={{ ...metricCardBase, borderLeft: '4px solid #059669' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <span style={{ ...metricLabelStyle, color: '#065F46' }}>Offering</span>
-              <div style={metricValueStyle}>
-                {totalAccepted} <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>Lolos</span>
-              </div>
+          ) : filteredTableData.length === 0 ? (
+            <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748B', fontSize: '12px' }}>
+              <FiInbox size={26} style={{ display: 'block', margin: '0 auto 8px auto', color: '#94A3B8' }} />
+              Belum ada catatan lamaran kerja pada periode ini.
             </div>
-            <div style={{ background: '#D1FAE5', color: '#059669', padding: '7px', borderRadius: '10px', display: 'flex' }}>
-              <FiCheckCircle size={15} />
-            </div>
-          </div>
-          <div style={{ marginTop: '8px', fontSize: '10px', color: '#064E3B', fontWeight: '500' }}>
-            Penawaran / diterima
-          </div>
-        </div>
-
-      </div>
-
-      {/* Kontainer Daftar Riwayat Lamaran */}
-      <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '18px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-        
-        {/* Header Seksi & Kontrol Filter */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
-          <div>
-            <h2 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
-              Daftar Riwayat Lamaran
-            </h2>
-            <span style={{ fontSize: '11px', color: '#64748B' }}>
-              Rekapitulasi aplikasi loker yang telah dikirimkan.
-            </span>
-          </div>
-
-          {/* Form Filter Responsif (Full-width di HP) */}
-          <div className="filter-controls-container">
-            {/* Search Bar Input */}
-            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
-              <FiSearch size={14} color="#94A3B8" style={{ position: 'absolute', left: '12px' }} />
-              <input 
-                type="text" 
-                placeholder="Cari perusahaan/posisi..." 
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px 9px 34px', 
-                  borderRadius: '10px', 
-                  border: '1px solid #E2E8F0',
-                  fontSize: '12px', 
-                  outline: 'none', 
-                  background: '#F8FAFC', 
-                  color: '#0F172A',
-                  fontFamily: 'Poppins, sans-serif',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {/* Dropdown Perusahaan & Status (Grid 2 Kolom Seimbang di HP) */}
-            <div className="filter-dropdowns-row">
-              <select 
-                value={selectedCompany} 
-                onChange={(e) => { setSelectedCompany(e.target.value); setCurrentPage(1); }}
-                style={filterSelectResponsiveStyle}
-              >
-                <option value="ALL">Semua Perusahaan</option>
-                {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-
-              <select 
-                value={selectedStatus} 
-                onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
-                style={filterSelectResponsiveStyle}
-              >
-                <option value="ALL">Semua Status</option>
-                <option value="Applied">Applied</option>
-                <option value="Screening">Screening</option>
-                <option value="Interview">Interview</option>
-                <option value="Offering">Offering</option>
-                <option value="Accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Konten Data (Card View di HP & Tabel di Desktop) */}
-        {loading ? (
-          <div style={{ padding: '50px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '12px' }}>
-            <FiLoader className="spin" size={16} />
-            <span>Memuat catatan lamaran...</span>
-          </div>
-        ) : filteredTableData.length === 0 ? (
-          <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748B', fontSize: '12px' }}>
-            <FiInbox size={26} style={{ display: 'block', margin: '0 auto 8px auto', color: '#94A3B8' }} />
-            Belum ada catatan lamaran kerja pada periode ini.
-          </div>
-        ) : (
-          <>
-            {/* 1. TAMPILAN MOBILE: KARTU LIST RINGKAS */}
-            <div className="mobile-cards-view">
-              {paginatedData.map((item, idx) => {
-                const isOverdue = checkIsOverdue(item[1], item[5]);
-                return (
-                  <div 
-                    key={idx} 
-                    style={{
-                      background: isOverdue ? '#FFFDF5' : '#FFFFFF',
-                      border: isOverdue ? '1px solid #FDE68A' : '1px solid #E2E8F0',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#0F172A', lineHeight: '1.3' }}>
-                          {item[2] || '-'}
-                        </h4>
-                        <span style={{ fontSize: '11px', color: '#475569', fontWeight: '500' }}>
-                          {item[3] || '-'}
-                        </span>
-                      </div>
-                      {getStatusBadge(item[5])}
-                    </div>
-
-                    <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Tgl Apply: <strong>{formatDateDisplay(item[1])}</strong></span>
-                      {item[4] && item[4] !== '-' ? (
-                        <a 
-                          href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          style={{ color: '#2563EB', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '600' }}
-                        >
-                          Link Loker <FiExternalLink size={11} />
-                        </a>
-                      ) : (
-                        <span style={{ color: '#CBD5E1' }}>-</span>
-                      )}
-                    </div>
-
-                    {isOverdue && (
-                      <div style={{ fontSize: '10px', color: '#B45309', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <FiAlertTriangle size={11} /> &ge; 30 hari belum ada kabar
-                      </div>
-                    )}
-
-                    {item[6] && item[6] !== '-' && (
-                      <div style={{ background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px', fontSize: '11px', color: '#475569' }}>
-                        {item[6]}
-                      </div>
-                    )}
-
-                    <button 
-                      onClick={() => handleOpenEdit(item)}
+          ) : (
+            <>
+              {/* 1. Tampilan Mobile: Kartu Vertikal */}
+              <div className="mobile-cards-view">
+                {paginatedData.map((item, idx) => {
+                  const isOverdue = checkIsOverdue(item[1], item[5]);
+                  return (
+                    <div 
+                      key={idx} 
+                      className="job-card-item"
                       style={{
-                        marginTop: '2px',
-                        background: '#F1F5F9',
-                        border: '1px solid #E2E8F0',
-                        padding: '8px',
-                        borderRadius: '8px',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        color: '#334155',
-                        cursor: 'pointer',
+                        background: isOverdue ? '#F8FAFC' : '#FFFFFF',
+                        border: isOverdue ? '1px solid #CBD5E1' : '1px solid #E2E8F0',
+                        borderRadius: '14px',
+                        padding: '13px 15px',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
+                        flexDirection: 'column',
+                        gap: '8px',
+                        boxShadow: '0 2px 5px rgba(30, 27, 75, 0.02)'
                       }}
                     >
-                      <FiEdit2 size={12} /> Ubah Status
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#1E293B', lineHeight: '1.35' }}>
+                            {item[2] || '-'}
+                          </h4>
+                          <span style={{ fontSize: '11px', color: '#475569', fontWeight: '500', display: 'inline-block', marginTop: '2px' }}>
+                            {item[3] || '-'}
+                          </span>
+                        </div>
+                        {getStatusBadge(item[5])}
+                      </div>
 
-            {/* 2. TAMPILAN DESKTOP: TABEL STANDAR */}
-            <div className="desktop-table-view" style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #E2E8F0', color: '#64748B', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Tanggal Apply</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Perusahaan</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Posisi</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Link Loker</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Status</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600' }}>Catatan</th>
-                    <th style={{ padding: '12px 14px', fontWeight: '600', textAlign: 'center' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedData.map((item, idx) => {
-                    const isOverdue = checkIsOverdue(item[1], item[5]);
-                    return (
-                      <tr key={idx} style={{ borderBottom: '1px solid #F8FAFC', background: isOverdue ? '#FFFDF5' : 'transparent' }}>
-                        <td style={{ padding: '12px 14px', color: '#64748B', whiteSpace: 'nowrap', fontWeight: '500' }}>
-                          <div>{formatDateDisplay(item[1])}</div>
-                          {isOverdue && (
-                            <span style={{ fontSize: '10px', color: '#B45309', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
-                              <FiAlertTriangle size={10} /> &ge; 30 hari
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ padding: '12px 14px', fontWeight: '600', color: '#0F172A' }}>
-                          {item[2] || '-'}
-                        </td>
-                        <td style={{ padding: '12px 14px', color: '#334155', fontWeight: '500' }}>
-                          {item[3] || '-'}
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          {item[4] && item[4] !== '-' ? (
-                            <a 
-                              href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              style={{ color: '#2563EB', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
-                            >
-                              Buka <FiExternalLink size={12} />
-                            </a>
-                          ) : (
-                            <span style={{ color: '#94A3B8' }}>-</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          {getStatusBadge(item[5])}
-                        </td>
-                        <td style={{ padding: '12px 14px', color: '#64748B', maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item[6] || '-'}
-                        </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                          <button 
-                            onClick={() => handleOpenEdit(item)}
-                            style={actionEditBtnStyle}
-                            title="Ubah Status & Catatan"
+                      <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Tgl Apply: <strong style={{ color: '#2E3192', fontWeight: '600' }}>{formatDateDisplay(item[1])}</strong></span>
+                        {item[4] && item[4] !== '-' ? (
+                          <a 
+                            href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            style={{ color: '#2E3192', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '600' }}
                           >
-                            <FiEdit2 size={13} />
-                            <span>Ubah</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
+                            Tautan Loker <FiExternalLink size={11} />
+                          </a>
+                        ) : (
+                          <span style={{ color: '#CBD5E1' }}>-</span>
+                        )}
+                      </div>
 
-        {/* Pagination */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #F1F5F9', fontSize: '11px', color: '#64748B', flexWrap: 'wrap', gap: '8px' }}>
-          <span>
-            {filteredTableData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, filteredTableData.length)} dari {filteredTableData.length} baris
-          </span>
+                      {isOverdue && (
+                        <div style={{ fontSize: '10px', color: '#D97706', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <FiAlertCircle size={11} /> &ge; 30 hari belum ada kabar
+                        </div>
+                      )}
 
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button 
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              style={paginationBtnStyle}
-            >
-              Sebelumnya
-            </button>
+                      {item[6] && item[6] !== '-' && (
+                        <div style={{ background: '#F8FAFC', padding: '6px 10px', borderRadius: '8px', fontSize: '11px', color: '#475569', lineHeight: '1.4', fontWeight: '500' }}>
+                          {item[6]}
+                        </div>
+                      )}
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                      <button 
+                        onClick={() => handleOpenEdit(item)}
+                        style={{
+                          marginTop: '2px',
+                          background: '#FFFFFF',
+                          border: '1px solid #E2E8F0',
+                          padding: '7px 10px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#1E1B4B',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '5px',
+                          transition: 'all 0.18s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = '#FFFFFF'}
+                      >
+                        <FiEdit2 size={12} color="#2E3192" /> Perbarui Status
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 2. Tampilan Desktop: Tabel Standar */}
+              <div className="desktop-table-view" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #E2E8F0', color: '#64748B', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Tanggal Apply</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Perusahaan</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Posisi Jabatan</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Tautan Loker</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Status Seleksi</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600' }}>Catatan</th>
+                      <th style={{ padding: '12px 14px', fontWeight: '600', textAlign: 'center' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedData.map((item, idx) => {
+                      const isOverdue = checkIsOverdue(item[1], item[5]);
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9', background: isOverdue ? '#F8FAFC' : idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }}>
+                          <td style={{ padding: '12px 14px', color: '#64748B', whiteSpace: 'nowrap', fontWeight: '500' }}>
+                            <div>{formatDateDisplay(item[1])}</div>
+                            {isOverdue && (
+                              <span style={{ fontSize: '10px', color: '#D97706', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                                <FiAlertCircle size={10} /> &ge; 30 hari
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px 14px', fontWeight: '700', color: '#1E293B' }}>
+                            {item[2] || '-'}
+                          </td>
+                          <td style={{ padding: '12px 14px', color: '#334155', fontWeight: '500' }}>
+                            {item[3] || '-'}
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            {item[4] && item[4] !== '-' ? (
+                              <a 
+                                href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                style={{ color: '#2E3192', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '600' }}
+                              >
+                                Buka <FiExternalLink size={12} />
+                              </a>
+                            ) : (
+                              <span style={{ color: '#94A3B8' }}>-</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            {getStatusBadge(item[5])}
+                          </td>
+                          <td style={{ padding: '12px 14px', color: '#64748B', maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: '500' }}>
+                            {item[6] || '-'}
+                          </td>
+                          <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                            <button 
+                              onClick={() => handleOpenEdit(item)}
+                              style={actionEditBtnStyle}
+                              title="Ubah Status & Catatan"
+                            >
+                              <FiEdit2 size={12} color="#2E3192" />
+                              <span>Ubah</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {/* Pagination Humanis */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #F1F5F9', fontSize: '11px', color: '#64748B', flexWrap: 'wrap', gap: '8px' }}>
+            <span>
+              Menampilkan {filteredTableData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, filteredTableData.length)} dari {filteredTableData.length} baris
+            </span>
+
+            <div style={{ display: 'flex', gap: '4px' }}>
               <button 
-                key={num}
-                onClick={() => setCurrentPage(num)}
-                style={{
-                  ...paginationBtnStyle,
-                  background: currentPage === num ? '#0F172A' : '#FFFFFF',
-                  color: currentPage === num ? '#FFFFFF' : '#475569',
-                  border: currentPage === num ? '1px solid #0F172A' : '1px solid #E2E8F0'
-                }}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                style={paginationBtnStyle}
               >
-                {num}
+                Sebelumnya
               </button>
-            ))}
 
-            <button 
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              style={paginationBtnStyle}
-            >
-              Selanjutnya
-            </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                <button 
+                  key={num}
+                  onClick={() => setCurrentPage(num)}
+                  style={{
+                    ...paginationBtnStyle,
+                    background: currentPage === num ? '#2E3192' : '#FFFFFF',
+                    color: currentPage === num ? '#F59E0B' : '#475569',
+                    border: currentPage === num ? '1px solid #2E3192' : '1px solid #E2E8F0',
+                    fontWeight: currentPage === num ? '600' : '500'
+                  }}
+                >
+                  {num}
+                </button>
+              ))}
+
+              <button 
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={paginationBtnStyle}
+              >
+                Selanjutnya
+              </button>
+            </div>
           </div>
+
         </div>
 
       </div>
@@ -811,16 +991,16 @@ export default function WorkiezHome() {
         onSuccess={() => fetchApplications()} 
       />
 
-      {/* Pop-up Modal Edit Status */}
+      {/* Pop-up Modal Edit Status Minimalis */}
       {editingItem && (
         <div style={modalOverlayStyle}>
-          <div style={{ ...modalBoxStyle, maxWidth: '400px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <div style={{ ...modalBoxStyle, maxWidth: '380px', padding: '22px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
-                  Perbarui Status Lamaran
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1E1B4B' }}>
+                  Perbarui Status
                 </h3>
-                <span style={{ fontSize: '11px', color: '#64748B' }}>
+                <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '500' }}>
                   {editingItem[2]} — {editingItem[3]}
                 </span>
               </div>
@@ -831,16 +1011,16 @@ export default function WorkiezHome() {
 
             <form onSubmit={handleSaveEdit}>
               <div style={{ marginBottom: '14px' }}>
-                <label style={formLabelStyle}>Status Terbaru</label>
+                <label style={formLabelStyle}>Tahapan Seleksi Terbaru</label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiActivity size={14} /></span>
+                  <span style={{ position: 'absolute', left: '10px', color: '#64748B', display: 'flex' }}><FiActivity size={13} /></span>
                   <select 
                     value={editStatus} 
                     onChange={(e) => setEditStatus(e.target.value)} 
-                    style={{ ...formInputStyle, paddingLeft: '34px' }}
+                    style={{ ...formInputStyle, paddingLeft: '30px' }}
                   >
                     <option value="Applied">Applied (Terkirim)</option>
-                    <option value="Screening">Screening (CV Review)</option>
+                    <option value="Screening">Screening (Review CV)</option>
                     <option value="Interview">Interview (Wawancara)</option>
                     <option value="Offering">Offering (Penawaran)</option>
                     <option value="Accepted">Accepted (Diterima)</option>
@@ -850,15 +1030,15 @@ export default function WorkiezHome() {
               </div>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={formLabelStyle}>Catatan Follow-up / Progres</label>
+                <label style={formLabelStyle}>Catatan / Tindak Lanjut</label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ position: 'absolute', left: '12px', color: '#64748B', display: 'flex' }}><FiFileText size={14} /></span>
+                  <span style={{ position: 'absolute', left: '10px', color: '#64748B', display: 'flex' }}><FiFileText size={13} /></span>
                   <input 
                     type="text" 
-                    placeholder="Contoh: Sudah follow up via email HR" 
+                    placeholder="Contoh: Jadwal wawancara tanggal 25" 
                     value={editCatatan} 
                     onChange={(e) => setEditCatatan(e.target.value)} 
-                    style={{ ...formInputStyle, paddingLeft: '34px' }}
+                    style={{ ...formInputStyle, paddingLeft: '30px' }}
                   />
                 </div>
               </div>
@@ -868,7 +1048,7 @@ export default function WorkiezHome() {
                   Batal
                 </button>
                 <button type="submit" disabled={isUpdating} style={modalSubmitBtnStyle}>
-                  {isUpdating ? <FiLoader className="spin" size={14} /> : <FiCheck size={14} />}
+                  {isUpdating ? <FiLoader className="spin" size={13} /> : <FiCheck size={13} />}
                   <span>{isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
                 </button>
               </div>
@@ -882,91 +1062,69 @@ export default function WorkiezHome() {
 }
 
 // Styling Internal Pendukung
-const metricCardBase = {
-  background: '#FFFFFF',
-  borderTop: '1px solid #E2E8F0',
-  borderRight: '1px solid #E2E8F0',
-  borderBottom: '1px solid #E2E8F0',
-  padding: '14px 12px',
-  borderRadius: '14px',
-  boxSizing: 'border-box',
-  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.02)',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between'
-};
-
-const metricLabelStyle = {
-  fontSize: '10px',
-  fontWeight: '700',
-  color: '#64748B',
-  textTransform: 'uppercase',
-  letterSpacing: '0.3px',
-  display: 'block'
-};
-
-const metricValueStyle = {
-  fontSize: '15px',
-  fontWeight: '700',
-  color: '#0F172A',
-  marginTop: '4px',
-  letterSpacing: '-0.3px'
-};
-
 const navIconBtnStyle = {
-  background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '5px',
-  borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#475569'
+  background: '#FFFFFF', border: '1px solid #CBD5E1', padding: '6px',
+  borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#1E1B4B'
 };
 
 const activeTabBtnStyle = {
-  background: '#FFFFFF', border: 'none', padding: '4px 10px', borderRadius: '8px',
-  fontSize: '11px', fontWeight: '700', color: '#0F172A', cursor: 'pointer',
-  boxShadow: '0 1px 2px rgba(0,0,0,0.05)', fontFamily: 'Poppins, sans-serif'
+  background: 'linear-gradient(135deg, #2E3192 0%, #1E1B4B 100%)', 
+  border: 'none', padding: '5px 12px', borderRadius: '8px',
+  fontSize: '11px', fontWeight: '600', color: '#F59E0B', cursor: 'pointer',
+  boxShadow: '0 2px 6px rgba(46, 49, 146, 0.25)', fontFamily: 'Poppins, sans-serif'
 };
 
 const inactiveTabBtnStyle = {
-  background: 'transparent', border: 'none', padding: '4px 10px', borderRadius: '8px',
+  background: 'transparent', border: 'none', padding: '5px 12px', borderRadius: '8px',
   fontSize: '11px', fontWeight: '500', color: '#64748B', cursor: 'pointer', fontFamily: 'Poppins, sans-serif'
 };
 
 const filterSelectResponsiveStyle = {
   width: '100%',
-  padding: '8px 10px',
-  borderRadius: '10px',
-  border: '1px solid #E2E8F0',
-  fontSize: '11px',
-  color: '#334155',
+  padding: '10px 36px 10px 14px',
+  borderRadius: '12px',
+  border: '1px solid #CBD5E1',
+  fontSize: '12px',
+  color: '#1E1B4B',
   background: '#F8FAFC',
   outline: 'none',
   cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif',
-  fontWeight: '600',
-  boxSizing: 'border-box'
+  fontWeight: '500',
+  boxSizing: 'border-box',
+  lineHeight: '1.4',
+  height: '42px'
 };
 
 const paginationBtnStyle = {
-  padding: '4px 8px', background: '#FFFFFF', border: '1px solid #E2E8F0',
+  padding: '5px 10px', background: '#FFFFFF', border: '1px solid #E2E8F0',
   borderRadius: '8px', fontSize: '11px', color: '#475569', cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif', fontWeight: '500'
 };
 
 const actionEditBtnStyle = {
-  background: '#F1F5F9', border: '1px solid #E2E8F0', padding: '5px 10px',
-  borderRadius: '8px', fontSize: '11px', fontWeight: '600', color: '#334155',
-  cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px',
-  transition: 'all 0.2s ease'
+  background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '5px 10px',
+  borderRadius: '8px', fontSize: '11px', fontWeight: '600', color: '#1E1B4B',
+  cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px',
+  transition: 'all 0.18s ease'
 };
 
 const modalOverlayStyle = {
   position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-  background: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(4px)',
+  background: 'rgba(30, 27, 75, 0.55)', backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
   display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999, padding: '16px'
 };
 
 const modalBoxStyle = {
-  background: '#FFFFFF', borderRadius: '18px', padding: '20px',
-  width: '100%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-  fontFamily: 'Poppins, sans-serif', boxSizing: 'border-box'
+  background: '#FFFFFF', 
+  borderRadius: '20px', 
+  padding: '22px',
+  width: '100%', 
+  boxShadow: '0 20px 35px -10px rgba(30, 27, 75, 0.2)',
+  fontFamily: 'Poppins, sans-serif', 
+  boxSizing: 'border-box',
+  border: '1px solid #E2E8F0'
 };
 
 const iconCloseBtnStyle = {
@@ -975,24 +1133,27 @@ const iconCloseBtnStyle = {
 };
 
 const formLabelStyle = {
-  display: 'block', fontSize: '11px', fontWeight: '600',
-  color: '#475569', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.3px'
+  display: 'block', fontSize: '10px', fontWeight: '600',
+  color: '#1E1B4B', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.3px'
 };
 
 const formInputStyle = {
-  width: '100%', padding: '8px 12px', borderRadius: '10px',
+  width: '100%', padding: '8px 10px', borderRadius: '8px',
   border: '1px solid #CBD5E1', fontSize: '12px', outline: 'none',
-  boxSizing: 'border-box', fontFamily: 'Poppins, sans-serif', background: '#F8FAFC', color: '#0F172A'
+  boxSizing: 'border-box', fontFamily: 'Poppins, sans-serif', background: '#F8FAFC', color: '#1E293B',
+  fontWeight: '500'
 };
 
 const modalCancelBtnStyle = {
-  padding: '8px 14px', background: '#F1F5F9', border: 'none', borderRadius: '10px',
-  fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer',
+  padding: '8px 14px', background: '#F1F5F9', border: 'none', borderRadius: '8px',
+  fontSize: '11px', fontWeight: '500', color: '#475569', cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif'
 };
 
 const modalSubmitBtnStyle = {
-  padding: '8px 16px', background: '#0F172A', border: 'none', borderRadius: '10px',
-  fontSize: '12px', fontWeight: '600', color: '#FFFFFF', cursor: 'pointer',
-  fontFamily: 'Poppins, sans-serif', display: 'flex', alignItems: 'center', gap: '6px'
+  padding: '8px 16px', background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
+  border: 'none', borderRadius: '8px',
+  fontSize: '11px', fontWeight: '600', color: '#1E1B4B', cursor: 'pointer',
+  fontFamily: 'Poppins, sans-serif', display: 'flex', alignItems: 'center', gap: '6px',
+  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)'
 };

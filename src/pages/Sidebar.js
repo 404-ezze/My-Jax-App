@@ -2,14 +2,104 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FiX, 
-  FiHome, 
-  FiDollarSign, 
-  FiCheckSquare, 
-  FiBriefcase, 
-  FiClock, 
-  FiSettings, 
+  FiActivity, 
+  FiSliders, 
   FiChevronRight
 } from 'react-icons/fi';
+
+// --- MINI TILE GRAFIS KHUSUS SIDEBAR (SENADA DASHBOARD) ---
+const SidebarDashboardTile = () => (
+  <div style={{
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 2px 6px rgba(46, 49, 146, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.35)' }} />
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+      <rect x="3" y="3" width="6" height="6" rx="1.5" fill="#FFFFFF" />
+      <rect x="11" y="3" width="6" height="6" rx="1.5" fill="#F59E0B" />
+      <rect x="3" y="11" width="6" height="6" rx="1.5" fill="#CBD5E1" />
+      <rect x="11" y="11" width="6" height="6" rx="1.5" fill="#FFFFFF" />
+    </svg>
+  </div>
+);
+
+const SidebarSpendingTile = () => (
+  <div style={{
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #3B3DBF 0%, #24248A 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 2px 6px rgba(36, 36, 138, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.35)' }} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="5" width="20" height="14" rx="4" fill="#FFFFFF" />
+      <path d="M2 9.5H22" stroke="#3B3DBF" strokeWidth="2" />
+      <circle cx="17.5" cy="14.5" r="1.8" fill="#F59E0B" />
+    </svg>
+  </div>
+);
+
+const SidebarTasksTile = () => (
+  <div style={{
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #059669 0%, #046A4A 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.25)' }} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="3" width="16" height="18" rx="3" fill="#FFFFFF" />
+      <rect x="8" y="1.5" width="8" height="3" rx="1.5" fill="#F59E0B" />
+      <path d="M7.5 9L9.5 11L14 6.5" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  </div>
+);
+
+const SidebarWorkiezTile = () => (
+  <div style={{
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 2px 6px rgba(30, 27, 75, 0.25)',
+    flexShrink: 0
+  }}>
+    <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.35)' }} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="7" width="18" height="13" rx="3" fill="#FFFFFF" />
+      <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke="#FFFFFF" strokeWidth="2" />
+      <rect x="10.5" y="10.5" width="3" height="3" rx="1" fill="#F59E0B" />
+    </svg>
+  </div>
+);
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation();
@@ -21,40 +111,32 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     {
       path: '/',
       label: 'Dashboard',
-      desc: 'Ringkasan analitik & metrik',
-      icon: FiHome,
-      color: '#2563EB',
-      bgLight: '#EFF6FF'
+      desc: 'Ringkasan & agenda harian',
+      TileComponent: SidebarDashboardTile
     },
     {
       path: '/spending',
       label: 'Spending Hub',
-      desc: 'Pencatatan kas & pengeluaran',
-      icon: FiDollarSign,
-      color: '#3B82F6',
-      bgLight: '#EFF6FF'
+      desc: 'Pencatatan kas & mutasi dana',
+      TileComponent: SidebarSpendingTile
     },
     {
       path: '/tasks',
       label: 'Tasks & Agenda',
-      desc: 'Target tugas & prioritas',
-      icon: FiCheckSquare,
-      color: '#10B981',
-      bgLight: '#ECFDF5'
+      desc: 'Prioritas pengerjaan & jadwal',
+      TileComponent: SidebarTasksTile
     },
     {
       path: '/workiez',
       label: 'Job Tracker',
-      desc: 'Monitoring lamaran kerja',
-      icon: FiBriefcase,
-      color: '#F59E0B',
-      bgLight: '#FFFBEB'
+      desc: 'Monitoring status lamaran kerja',
+      TileComponent: SidebarWorkiezTile
     }
   ];
 
   const secondaryItems = [
-    { path: '/history', label: 'Riwayat Log', icon: FiClock },
-    { path: '/settings', label: 'Pengaturan Sistem', icon: FiSettings }
+    { path: '/history', label: 'Riwayat Log', icon: FiActivity },
+    { path: '/settings', label: 'Pengaturan Sistem', icon: FiSliders }
   ];
 
   return (
@@ -69,7 +151,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             left: 0, 
             width: '100vw', 
             height: '100vh', 
-            background: 'rgba(15, 23, 42, 0.45)', 
+            background: 'rgba(30, 27, 75, 0.45)', 
             backdropFilter: 'blur(6px)', 
             WebkitBackdropFilter: 'blur(6px)',
             zIndex: 9998, 
@@ -78,33 +160,33 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         />
       )}
 
-      {/* Kontainer Sidebar */}
+      {/* Kontainer Sidebar (Clean White) */}
       <aside style={{
         position: 'fixed', 
         top: 0, 
         left: isOpen ? 0 : `-${sidebarWidth}`, 
         width: sidebarWidth, 
         height: '100vh',
-        background: 'rgba(255, 255, 255, 0.94)', 
-        backdropFilter: 'blur(20px)', 
-        WebkitBackdropFilter: 'blur(20px)',
+        background: '#FFFFFF', 
+        borderRight: '1px solid #E2E8F0',
         zIndex: 9999, 
-        transition: 'left 0.35s cubic-bezier(0.16, 1, 0.3, 1)', 
-        boxShadow: '15px 0 35px rgba(15, 23, 42, 0.08)', 
+        transition: 'left 0.32s cubic-bezier(0.16, 1, 0.3, 1)', 
+        boxShadow: '15px 0 35px rgba(30, 27, 75, 0.08)', 
         display: 'flex', 
         flexDirection: 'column',
         boxSizing: 'border-box',
         fontFamily: 'Poppins, sans-serif'
       }}>
         
+        {/* Header Sidebar */}
         <div style={{ 
-          padding: '24px 20px 20px 20px', 
+          padding: '18px 18px 16px 18px', 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
           borderBottom: '1px solid #F1F5F9' 
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img 
               src="/image/logo_myjax.png" 
               alt="Logo" 
@@ -113,25 +195,28 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 height: '36px', 
                 objectFit: 'contain', 
                 borderRadius: '10px',
-                background: '#FFFFFF',
+                background: '#F8FAFC',
                 padding: '3px',
+                border: '1px solid #E2E8F0',
                 flexShrink: 0
               }}
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <div style={{ paddingLeft: '2px' }}>
-              <h3 style={{ margin: 0, color: '#0F172A', fontSize: '15px', fontWeight: '700', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
+            <div>
+              <h3 style={{ margin: 0, color: '#1E1B4B', fontSize: '15px', fontWeight: '600', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
                 MY JAX
               </h3>
               <span style={{ 
-                display: 'block', 
-                marginTop: '4px', 
-                fontSize: '11px', 
+                display: 'inline-flex', 
+                alignItems: 'center',
+                gap: '5px',
+                marginTop: '3px', 
+                fontSize: '10px', 
                 color: '#64748B', 
-                fontWeight: '500',
+                fontWeight: '400',
                 lineHeight: '1.3' 
               }}>
-                Productivity & Financial Management System
+                Productivity & Finance System
               </span>
             </div>
           </div>
@@ -145,7 +230,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               padding: '6px', 
               display: 'flex', 
               alignItems: 'center',
-              borderRadius: '8px',
+              borderRadius: '8px', 
               color: '#64748B',
               flexShrink: 0,
               transition: 'all 0.2s ease'
@@ -158,15 +243,15 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         </div>
 
         {/* Menu Navigasi Utama */}
-        <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
+        <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto' }}>
+          <span style={{ fontSize: '10px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
             Modul Utama
           </span>
 
           {menuItems.map((item, idx) => {
             const isActive = location.pathname.toLowerCase() === item.path.toLowerCase();
             const isHovered = hoveredIdx === idx;
-            const Icon = item.icon;
+            const TileComp = item.TileComponent;
 
             return (
               <Link 
@@ -180,27 +265,22 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '10px 12px',
+                  padding: '9px 12px',
                   borderRadius: '12px',
-                  background: isActive ? '#F8FAFC' : isHovered ? '#F1F5F9' : 'transparent',
-                  border: isActive ? '1px solid #E2E8F0' : '1px solid transparent',
-                  transform: isHovered && !isActive ? 'translateX(4px)' : 'none',
+                  background: isActive ? 'rgba(46, 49, 146, 0.08)' : isHovered ? '#F8FAFC' : 'transparent',
+                  border: isActive ? '1px solid rgba(46, 49, 146, 0.2)' : '1px solid transparent',
+                  transform: isHovered && !isActive ? 'translateX(3px)' : 'none',
                   transition: 'all 0.2s ease'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ 
-                    background: isActive ? item.bgLight : isHovered ? '#E2E8F0' : '#F1F5F9', 
-                    color: item.color, 
-                    padding: '8px', 
-                    borderRadius: '10px', 
-                    display: 'flex',
-                    transition: 'all 0.2s ease'
-                  }}>
-                    <Icon size={16} />
-                  </div>
+                  <TileComp />
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: isActive ? '600' : '500', color: isActive ? '#0F172A' : '#334155' }}>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      fontWeight: isActive ? '600' : '500', 
+                      color: isActive ? '#2E3192' : '#1E293B' 
+                    }}>
                       {item.label}
                     </div>
                     <div style={{ fontSize: '10px', color: '#64748B', fontWeight: '400' }}>
@@ -212,7 +292,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 {(isActive || isHovered) && (
                   <FiChevronRight 
                     size={14} 
-                    color={isActive ? '#0F172A' : '#94A3B8'} 
+                    color={isActive ? '#F59E0B' : '#94A3B8'} 
                     style={{ transform: isHovered ? 'translateX(2px)' : 'none', transition: 'transform 0.2s ease' }} 
                   />
                 )}
@@ -220,9 +300,9 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             );
           })}
 
-          <div style={{ borderTop: '1px solid #F1F5F9', margin: '12px 0 8px 0' }} />
+          <div style={{ borderTop: '1px solid #F1F5F9', margin: '14px 0 10px 0' }} />
 
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
             Preferensi
           </span>
 
@@ -245,24 +325,25 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                   gap: '12px',
                   padding: '9px 12px',
                   borderRadius: '10px',
-                  color: isActive ? '#0F172A' : isHovered ? '#1E293B' : '#64748B',
-                  background: isActive ? '#F8FAFC' : isHovered ? '#F1F5F9' : 'transparent',
-                  transform: isHovered && !isActive ? 'translateX(4px)' : 'none',
+                  color: isActive ? '#2E3192' : isHovered ? '#1E293B' : '#64748B',
+                  background: isActive ? 'rgba(46, 49, 146, 0.06)' : isHovered ? '#F8FAFC' : 'transparent',
+                  border: isActive ? '1px solid rgba(46, 49, 146, 0.15)' : '1px solid transparent',
+                  transform: isHovered && !isActive ? 'translateX(3px)' : 'none',
                   fontSize: '12px',
                   fontWeight: isActive ? '600' : '500',
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Icon size={15} color={isActive ? '#0F172A' : isHovered ? '#334155' : '#94A3B8'} />
+                <Icon size={15} color={isActive ? '#2E3192' : isHovered ? '#334155' : '#94A3B8'} />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </div>
 
-        {/* Footer Bersih */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid #F1F5F9', textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: '11px', fontWeight: '600', color: '#94A3B8', letterSpacing: '0.4px' }}>
+        {/* Footer Sidebar */}
+        <div style={{ padding: '14px 18px', borderTop: '1px solid #F1F5F9', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '11px', fontWeight: '500', color: '#94A3B8', letterSpacing: '0.3px' }}>
             © 2026, Eze. All rights reserved.
           </p>
         </div>
