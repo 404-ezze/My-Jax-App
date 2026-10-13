@@ -1,0 +1,495 @@
+/* =========================================================================
+   NEW TWO-COLUMN MODAL STYLING (MATCHING THE REFERENCE SCREENSHOT)
+   ========================================================================= */
+
+.spending-modal-card--twocol {
+  max-width: 890px;
+  width: 95%;
+  max-height: 94vh;
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: 36px 36px 28px 36px;
+  position: relative;
+  background: #FFFFFF;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.28);
+}
+
+.spending-modal-close-corner {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.spending-modal-close-corner:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+
+.spending-twocol-container {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  column-gap: 36px;
+  row-gap: 20px;
+}
+
+/* Kolom Kiri: Form */
+.spending-left-pane {
+  display: flex;
+  flex-direction: column;
+}
+
+.spending-form-header {
+  margin-bottom: 22px;
+}
+
+.spending-form-title {
+  margin: 0 0 6px 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+}
+
+.spending-form-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 400;
+}
+
+/* Selector Belanja vs Dana Masuk */
+.spending-type-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.spending-type-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.spending-type-box--active-expense {
+  background: #FFFBEB;
+  border: 2px solid #F59E0B;
+}
+
+.spending-type-box--active-income {
+  background: #F5F3FF;
+  border: 2px solid #4338CA;
+}
+
+.spending-type-box--inactive {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+}
+
+.spending-type-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spending-type-icon--expense {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.spending-type-icon--income {
+  background: #EDE9FE;
+  color: #4F46E5;
+}
+
+.spending-type-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1E293B;
+  text-align: left;
+  line-height: 1.3;
+}
+
+/* Input Row & Col */
+.spending-input-dual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.spending-input-dual-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.spending-form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.spending-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.spending-rp-badge {
+  position: absolute;
+  left: 14px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1E1B4B;
+  pointer-events: none;
+}
+
+.spending-input-left-icon {
+  position: absolute;
+  left: 14px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.spending-input-right-chevron {
+  position: absolute;
+  right: 14px;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.spending-text-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  font-size: 13px;
+  font-family: Poppins, sans-serif;
+  color: #1E293B;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.spending-text-input--with-prefix {
+  padding-left: 42px;
+  font-weight: 600;
+}
+
+.spending-text-input--with-icon {
+  padding-left: 40px;
+}
+
+.spending-text-input:focus,
+.spending-select-input:focus {
+  border-color: #3B3DBF;
+  box-shadow: 0 0 0 3px rgba(59, 61, 191, 0.1);
+}
+
+.spending-select-input {
+  width: 100%;
+  padding: 12px 40px 12px 40px;
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  font-size: 13px;
+  font-family: Poppins, sans-serif;
+  color: #1E293B;
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* Kolom Kanan: Ilustrasi & Bukti Transaksi */
+.spending-right-pane {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+}
+
+.spending-illustration-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.spending-receipt-graphic {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spending-receipt-paper {
+  width: 70px;
+  height: 75px;
+  background: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(148, 163, 184, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 8px;
+  box-sizing: border-box;
+  transform: rotate(-6deg);
+}
+
+.spending-receipt-line {
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 4px;
+}
+
+.spending-receipt-line--1 { width: 85%; }
+.spending-receipt-line--2 { width: 65%; }
+.spending-receipt-line--3 { width: 45%; }
+
+.spending-receipt-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #FEF3C7;
+  border: 2px solid #F59E0B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.spending-receipt-sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #F59E0B;
+}
+
+.spending-receipt-sparkle--1 { top: 12px; right: 8px; }
+.spending-receipt-sparkle--2 { top: 22px; right: 0px; }
+
+.spending-right-header {
+  margin-bottom: 16px;
+}
+
+.spending-right-title {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E1B4B;
+  letter-spacing: -0.3px;
+}
+
+.spending-right-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #64748B;
+  line-height: 1.45;
+}
+
+.spending-action-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.spending-action-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.spending-action-tile:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.spending-action-tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spending-action-tile-icon--purple {
+  background: #EDE9FE;
+  color: #4F46E5;
+}
+
+.spending-action-tile-icon--amber {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.spending-action-tile-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.spending-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F8FAFC;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+}
+
+.spending-info-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #4F46E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spending-info-text {
+  margin: 0;
+  font-size: 10.5px;
+  color: #64748B;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Footer Tombol */
+.spending-twocol-footer {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.spending-footer-btn-cancel {
+  padding: 12px 24px;
+  background: #F1F5F9;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.spending-footer-btn-cancel:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.spending-footer-btn-submit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: #3B3DBF;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  box-shadow: 0 4px 14px rgba(59, 61, 191, 0.35);
+  transition: all 0.2s ease;
+}
+
+.spending-footer-btn-submit:hover {
+  background: #2E3192;
+  box-shadow: 0 6px 18px rgba(46, 49, 146, 0.45);
+}
+
+.spending-footer-btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsif Mobile (Breakpoint < 768px): Tumpuk Vertikal */
+@media (max-width: 768px) {
+  .spending-modal-card--twocol {
+    padding: 24px 18px 20px 18px;
+  }
+
+  .spending-twocol-container {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+  }
+
+  .spending-type-selector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spending-input-dual-row {
+    grid-template-columns: 1fr;
+  }
+
+  .spending-twocol-footer {
+    justify-content: stretch;
+  }
+
+  .spending-footer-btn-cancel,
+  .spending-footer-btn-submit {
+    flex: 1;
+    justify-content: center;
+  }
+}

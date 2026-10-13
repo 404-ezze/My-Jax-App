@@ -1,0 +1,36 @@
+/* Workiez Responsive Styles & Animations */
+.job-card-item {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.job-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 27, 75, 0.05);
+}
+
+.filter-controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.filter-dropdowns-row-workiez {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 641px) {
+  .filter-controls-container {
+    flex-direction: row;
+    align-items: center;
+    justifyContent: flex-end;
+    width: auto;
+  }
+  .filter-dropdowns-row-workiez {
+    display: flex;
+    width: auto;
+  }
+}

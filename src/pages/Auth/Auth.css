@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+.onboard-full-screen {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #2563EB;
+  color: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Jam & Tanggal Lockscreen Tengah */
+.onboard-lockscreen-header {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.onboard-lockscreen-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+}
+
+.onboard-lockscreen-time {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+/* Lapisan Gelombang Meliuk Ekstra */
+.onboard-wave-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48%;
+  background-color: #FFFFFF;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.onboard-wave-svg {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  display: block;
+  transition: d 0.5s ease-in-out;
+}
+
+/* Area Maskot Tengah */
+.onboard-hero-visual-area {
+  position: relative;
+  z-index: 2;
+  flex: 1.15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 85px 20px 10px 20px;
+}
+
+/* Efek Aura Lembut */
+.onboard-glow-aura {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.onboard-mascot-img {
+  max-width: 300px;
+  width: 70%;
+  max-height: 240px;
+  object-fit: contain;
+  background: transparent !important;
+  filter: drop-shadow(0 14px 24px rgba(37, 99, 235, 0.16));
+}
+
+/* Animasi 1: Levitasi Lembut Naik-Turun */
+.anim-levitate {
+  animation: levitateAnim 3.2s ease-in-out infinite;
+}
+
+@keyframes levitateAnim {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-16px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Animasi 2: Goyang Miring & Denyut */
+.anim-sway-tilt {
+  animation: swayTiltAnim 3.8s ease-in-out infinite;
+}
+
+@keyframes swayTiltAnim {
+  0% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-4deg) translateY(-8px); }
+  75% { transform: rotate(4deg) translateY(-12px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* Animasi 3: Membesar Perlahan & Mengapung */
+.anim-zoom-float {
+  animation: zoomFloatAnim 3.5s ease-in-out infinite;
+}
+
+@keyframes zoomFloatAnim {
+  0% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.07) translateY(-14px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* Konten Teks & Tombol */
+.onboard-body-area {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 32px 42px 32px;
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.onboard-text-block {
+  text-align: left;
+}
+
+.onboard-main-title {
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.4px;
+  color: #FFFFFF;
+}
+
+.onboard-main-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Dots Indikator */
+.onboard-pagination-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 20px 0;
+}
+
+.onboard-dot-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.onboard-dot-indicator.active {
+  width: 26px;
+  background-color: #FFFFFF;
+}
+
+/* Navigasi */
+.onboard-nav-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.onboard-skip-label {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: inherit;
+}
+
+.onboard-next-pill-btn {
+  background-color: #FFCC00;
+  color: #1E1B4B;
+  border: none;
+  padding: 11px 26px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease;
+}
+
+.onboard-next-pill-btn:active {
+  transform: scale(0.96);
+}
+
+.onboard-yellow-cta-btn {
+  width: 100%;
+  background-color: #FFCC00;
+  color: #1E1B4B;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease;
+}
+
+.onboard-yellow-cta-btn:active {
+  transform: scale(0.97);
+}
+
+.onboard-auth-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.onboard-white-social-btn {
+  width: 100%;
+  background-color: #FFFFFF;
+  color: #1E293B;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.onboard-white-social-btn:active {
+  transform: scale(0.97);
+}
+
+.onboard-back-label {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  font-family: inherit;
+}
+
+.onboard-error-inline {
+  background-color: rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #FEE2E2;
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+/* Modal Sukses Google */
+.onboard-status-container {
+  max-width: 380px;
+  margin: auto;
+  padding: 32px 24px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.onboard-status-icon-wrap {
+  width: 66px;
+  height: 66px;
+  border-radius: 22px;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.onboard-file-card {
+  background-color: #FFFFFF;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 28px 0;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.onboard-file-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.onboard-file-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94A3B8;
+  letter-spacing: 0.5px;
+}
+
+.onboard-file-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1E293B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

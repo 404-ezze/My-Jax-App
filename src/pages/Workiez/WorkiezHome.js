@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { API_URL } from '../App';
-import Workiez from './Workiez';
-import { 
-  FiChevronLeft, 
-  FiChevronRight, 
-  FiPlus, 
-  FiSearch, 
-  FiCalendar, 
-  FiLoader, 
-  FiClock, 
-  FiInbox, 
-  FiSend, 
-  FiExternalLink, 
-  FiUserCheck, 
-  FiEdit2, 
-  FiAlertCircle, 
-  FiX, 
-  FiCheck, 
-  FiFileText, 
+import './Workiez.css';
+import WorkiezModal from './WorkiezModal';
+import { fetchSheetData, updateRowInSheet } from '../../utils/GoogleStorage';
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiPlus,
+  FiSearch,
+  FiCalendar,
+  FiLoader,
+  FiClock,
+  FiInbox,
+  FiSend,
+  FiExternalLink,
+  FiUserCheck,
+  FiEdit2,
+  FiAlertCircle,
+  FiX,
+  FiCheck,
+  FiFileText,
   FiActivity,
   FiAward
 } from 'react-icons/fi';
@@ -102,13 +103,26 @@ const InterviewTileGraphic = () => (
 );
 
 export default function WorkiezHome() {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
+  const [applications, setApplications] = useState(() => {
+    try {
+      const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
+      const key = authMode === 'guest' ? 'jax_guest_workiez' : 'jax_cache_workiez';
+      return JSON.parse(localStorage.getItem(key) || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const [loading, setLoading] = useState(() => {
+    const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
+    const key = authMode === 'guest' ? 'jax_guest_workiez' : 'jax_cache_workiez';
+    return !localStorage.getItem(key);
+  });
+
   // Navigasi Tanggal
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [periodType, setPeriodType] = useState('month');
-  
+
   // Filter & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('ALL');
@@ -127,40 +141,37 @@ export default function WorkiezHome() {
   const [editCatatan, setEditCatatan] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const fetchApplications = () => {
-    setLoading(true);
-    fetch(`${API_URL}?sheetName=Workiez`)
-      .then(res => res.json())
-      .then(resData => {
-        let rows = [];
-        if (Array.isArray(resData)) {
-          rows = resData;
-        } else if (resData && Array.isArray(resData.data)) {
-          rows = resData.data;
-        } else if (resData && Array.isArray(resData.values)) {
-          rows = resData.values;
-        }
+  const fetchApplications = async () => {
+    try {
+      const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
 
+      if (authMode === 'google') {
+        let rows = await fetchSheetData('Workiez');
         if (rows.length > 0) {
           const rowText = String(rows[0][1] || rows[0][0] || rows[0][2] || '').toLowerCase();
           if (
-            rowText.includes('tanggal') || 
-            rowText.includes('perusahaan') || 
-            rowText.includes('posisi') || 
-            rowText.includes('id') || 
+            rowText.includes('tanggal') ||
+            rowText.includes('perusahaan') ||
+            rowText.includes('posisi') ||
+            rowText.includes('id') ||
             rowText.includes('workiez')
           ) {
             rows = rows.slice(1);
           }
         }
 
-        setApplications(rows.reverse());
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Gagal mengambil data Workiez:', err);
-        setLoading(false);
-      });
+        const cleaned = rows.reverse();
+        setApplications(cleaned);
+        localStorage.setItem('jax_cache_workiez', JSON.stringify(cleaned));
+      } else {
+        const localData = JSON.parse(localStorage.getItem('jax_guest_workiez') || '[]');
+        setApplications(localData);
+      }
+    } catch (err) {
+      console.error('Gagal mengambil data Workiez:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -285,38 +296,37 @@ export default function WorkiezHome() {
     if (!editingItem) return;
 
     setIsUpdating(true);
-
-    const payload = {
-      action: 'update',
-      sheetName: 'Workiez',
-      id: editingItem[0],
-      rowData: [
-        editingItem[0],
-        editingItem[1],
-        editingItem[2],
-        editingItem[3],
-        editingItem[4],
-        editStatus,
-        editCatatan || '-'
-      ]
-    };
+    const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
+    const updatedRow = [
+      editingItem[0],
+      editingItem[1],
+      editingItem[2],
+      editingItem[3],
+      editingItem[4],
+      editStatus,
+      editCatatan || '-'
+    ];
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      
-      const res = await response.json();
-      if (res.status === 'success') {
-        setEditingItem(null);
-        fetchApplications();
+      if (authMode === 'google') {
+        // 1. Perbarui baris langsung di Google Sheets via GoogleStorage
+        await updateRowInSheet('Workiez', editingItem[0], updatedRow);
+
+        // 2. Perbarui state lokal dan cache
+        const updatedList = applications.map(item => item[0] === editingItem[0] ? updatedRow : item);
+        setApplications(updatedList);
+        localStorage.setItem('jax_cache_workiez', JSON.stringify(updatedList));
       } else {
-        alert('Gagal memperbarui status: ' + res.message);
+        // Mode Tamu: Perbarui di local storage
+        const guestList = JSON.parse(localStorage.getItem('jax_guest_workiez') || '[]');
+        const updatedGuest = guestList.map(item => item[0] === editingItem[0] ? updatedRow : item);
+        setApplications(updatedGuest);
+        localStorage.setItem('jax_guest_workiez', JSON.stringify(updatedGuest));
       }
+
+      setEditingItem(null);
     } catch (err) {
-      alert('Kendala koneksi: ' + err.message);
+      alert('Kendala penyimpanan: ' + err.message);
     } finally {
       setIsUpdating(false);
     }
@@ -339,16 +349,16 @@ export default function WorkiezHome() {
     }
 
     return (
-      <span style={{ 
-        backgroundColor: bg, 
-        color: text, 
-        padding: '3px 8px', 
-        borderRadius: '6px', 
-        fontSize: '11px', 
-        fontWeight: '600', 
-        display: 'inline-flex', 
-        alignItems: 'center', 
-        gap: '4px' 
+      <span style={{
+        backgroundColor: bg,
+        color: text,
+        padding: '3px 8px',
+        borderRadius: '6px',
+        fontSize: '11px',
+        fontWeight: '600',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px'
       }}>
         {icon}
         {statusName || 'Applied'}
@@ -358,43 +368,6 @@ export default function WorkiezHome() {
 
   return (
     <div style={{ maxWidth: '1040px', margin: '0 auto', fontFamily: 'Poppins, sans-serif', paddingBottom: '70px' }}>
-      
-      <style>{`
-        .job-card-item {
-          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
-        }
-        .job-card-item:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(30, 27, 75, 0.05);
-        }
-
-        .filter-controls-container {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          width: 100%;
-        }
-
-        .filter-dropdowns-row-workiez {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          width: 100%;
-        }
-
-        @media (min-width: 641px) {
-          .filter-controls-container {
-            flex-direction: row;
-            align-items: center;
-            justifyContent: flex-end;
-            width: auto;
-          }
-          .filter-dropdowns-row-workiez {
-            display: flex;
-            width: auto;
-          }
-        }
-      `}</style>
 
       {/* 1. HERO BANNER UNGU MEMPHIS DENGAN AKSEN KUNING */}
       <div style={{
@@ -452,20 +425,20 @@ export default function WorkiezHome() {
           </div>
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', maxWidth: '210px' }}>
-            <button 
+            <button
               onClick={() => setIsFormOpen(true)}
               style={{
                 width: '100%',
-                background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
-                color: '#1E1B4B', 
+                background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
+                color: '#FFFFFF',
                 border: 'none',
-                padding: '10px 16px', 
-                borderRadius: '12px', 
-                fontSize: '12px', 
-                fontWeight: '600', 
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
                 boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)',
@@ -481,7 +454,7 @@ export default function WorkiezHome() {
         </div>
       </div>
 
-      {/* 2. LEMBAR KONTEN PUTIH ELEGAN (OVERLAPPING TRAY) */}
+      {/* 2. LEMBAR KONTEN PUTIH ELEGAN */}
       <div style={{
         marginTop: '-35px',
         background: '#FFFFFF',
@@ -522,27 +495,27 @@ export default function WorkiezHome() {
           </div>
         )}
 
-        {/* Navigasi Periode Bergaya Modern */}
+        {/* Navigasi Periode */}
         <div style={{
-          background: '#F8FAFC', 
-          border: '1px solid #E2E8F0', 
+          background: '#F8FAFC',
+          border: '1px solid #E2E8F0',
           borderRadius: '16px',
-          padding: '10px 14px', 
-          display: 'flex', 
+          padding: '10px 14px',
+          display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
           gap: '10px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <button onClick={handlePrevPeriod} style={navIconBtnStyle} title="Periode Sebelumnya">
               <FiChevronLeft size={16} />
             </button>
-            
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px', fontWeight: '600', fontSize: '12px', color: '#1E1B4B' }}>
               <FiCalendar size={14} color="#F59E0B" />
               <span>
-                {periodType === 'month' 
+                {periodType === 'month'
                   ? `${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
                   : `Minggu ${Math.ceil(selectedDate.getDate() / 7)}, ${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
                 }
@@ -555,13 +528,13 @@ export default function WorkiezHome() {
           </div>
 
           <div style={{ display: 'flex', background: '#E2E8F0', padding: '3px', borderRadius: '10px' }}>
-            <button 
+            <button
               onClick={() => { setPeriodType('month'); setCurrentPage(1); }}
               style={periodType === 'month' ? activeTabBtnStyle : inactiveTabBtnStyle}
             >
               Bulanan
             </button>
-            <button 
+            <button
               onClick={() => { setPeriodType('week'); setCurrentPage(1); }}
               style={periodType === 'week' ? activeTabBtnStyle : inactiveTabBtnStyle}
             >
@@ -572,8 +545,7 @@ export default function WorkiezHome() {
 
         {/* --- DUO CARD: PIPELINE SELEKSI & TAHAPAN WAWANCARA --- */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '14px' }}>
-          
-          {/* Kartu 1: Pipeline Lamaran Masuk & Review Screening */}
+
           <div style={{
             background: '#F8FAFC',
             border: '1px solid #E2E8F0',
@@ -633,7 +605,6 @@ export default function WorkiezHome() {
             </div>
           </div>
 
-          {/* Kartu 2: Progres Wawancara & Hasil Offering */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.03) 0%, rgba(46, 49, 146, 0.05) 100%)',
             border: '1px solid #CBD5E1',
@@ -696,15 +667,14 @@ export default function WorkiezHome() {
         </div>
 
         {/* Kontainer Daftar Riwayat Lamaran */}
-        <div style={{ 
-          background: '#FFFFFF', 
-          border: '1px solid #E2E8F0', 
-          borderRadius: '18px', 
-          padding: '18px', 
-          boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)' 
+        <div style={{
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '18px',
+          padding: '18px',
+          boxShadow: '0 2px 10px rgba(15, 23, 42, 0.02)'
         }}>
-          
-          {/* Header Seksi & Kontrol Filter */}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
             <div>
               <h2 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '600', color: '#1E1B4B' }}>
@@ -715,23 +685,22 @@ export default function WorkiezHome() {
               </span>
             </div>
 
-            {/* Form Filter Responsif */}
             <div className="filter-controls-container">
               <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
                 <FiSearch size={14} color="#94A3B8" style={{ position: 'absolute', left: '12px' }} />
-                <input 
-                  type="text" 
-                  placeholder="Cari perusahaan atau posisi..." 
+                <input
+                  type="text"
+                  placeholder="Cari perusahaan atau posisi..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                   style={{
                     width: '100%',
-                    padding: '9px 12px 9px 34px', 
-                    borderRadius: '10px', 
-                    border: '1px solid #CBD5E1', 
-                    fontSize: '12px', 
-                    outline: 'none', 
-                    background: '#F8FAFC', 
+                    padding: '9px 12px 9px 34px',
+                    borderRadius: '10px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '12px',
+                    outline: 'none',
+                    background: '#F8FAFC',
                     color: '#1E293B',
                     fontFamily: 'Poppins, sans-serif',
                     fontWeight: '500',
@@ -741,8 +710,8 @@ export default function WorkiezHome() {
               </div>
 
               <div className="filter-dropdowns-row-workiez">
-                <select 
-                  value={selectedCompany} 
+                <select
+                  value={selectedCompany}
                   onChange={(e) => { setSelectedCompany(e.target.value); setCurrentPage(1); }}
                   style={filterSelectResponsiveStyle}
                 >
@@ -750,8 +719,8 @@ export default function WorkiezHome() {
                   {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
 
-                <select 
-                  value={selectedStatus} 
+                <select
+                  value={selectedStatus}
                   onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
                   style={filterSelectResponsiveStyle}
                 >
@@ -767,7 +736,6 @@ export default function WorkiezHome() {
             </div>
           </div>
 
-          {/* Konten Data */}
           {loading ? (
             <div style={{ padding: '50px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '12px' }}>
               <FiLoader className="spin" size={16} color="#F59E0B" />
@@ -780,13 +748,13 @@ export default function WorkiezHome() {
             </div>
           ) : (
             <>
-              {/* 1. Tampilan Mobile: Kartu Vertikal */}
+              {/* Tampilan Mobile: Kartu Vertikal */}
               <div className="mobile-cards-view">
                 {paginatedData.map((item, idx) => {
                   const isOverdue = checkIsOverdue(item[1], item[5]);
                   return (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="job-card-item"
                       style={{
                         background: isOverdue ? '#F8FAFC' : '#FFFFFF',
@@ -814,9 +782,9 @@ export default function WorkiezHome() {
                       <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>Tgl Apply: <strong style={{ color: '#2E3192', fontWeight: '600' }}>{formatDateDisplay(item[1])}</strong></span>
                         {item[4] && item[4] !== '-' ? (
-                          <a 
-                            href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
-                            target="_blank" 
+                          <a
+                            href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`}
+                            target="_blank"
                             rel="noreferrer"
                             style={{ color: '#2E3192', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: '600' }}
                           >
@@ -839,7 +807,7 @@ export default function WorkiezHome() {
                         </div>
                       )}
 
-                      <button 
+                      <button
                         onClick={() => handleOpenEdit(item)}
                         style={{
                           marginTop: '2px',
@@ -867,7 +835,7 @@ export default function WorkiezHome() {
                 })}
               </div>
 
-              {/* 2. Tampilan Desktop: Tabel Standar */}
+              {/* Tampilan Desktop: Tabel Standar */}
               <div className="desktop-table-view" style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
                   <thead>
@@ -902,9 +870,9 @@ export default function WorkiezHome() {
                           </td>
                           <td style={{ padding: '12px 14px' }}>
                             {item[4] && item[4] !== '-' ? (
-                              <a 
-                                href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`} 
-                                target="_blank" 
+                              <a
+                                href={item[4].startsWith('http') ? item[4] : `https://${item[4]}`}
+                                target="_blank"
                                 rel="noreferrer"
                                 style={{ color: '#2E3192', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '600' }}
                               >
@@ -921,7 +889,7 @@ export default function WorkiezHome() {
                             {item[6] || '-'}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                            <button 
+                            <button
                               onClick={() => handleOpenEdit(item)}
                               style={actionEditBtnStyle}
                               title="Ubah Status & Catatan"
@@ -939,14 +907,13 @@ export default function WorkiezHome() {
             </>
           )}
 
-          {/* Pagination Humanis */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #F1F5F9', fontSize: '11px', color: '#64748B', flexWrap: 'wrap', gap: '8px' }}>
             <span>
               Menampilkan {filteredTableData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, filteredTableData.length)} dari {filteredTableData.length} baris
             </span>
 
             <div style={{ display: 'flex', gap: '4px' }}>
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 style={paginationBtnStyle}
@@ -955,7 +922,7 @@ export default function WorkiezHome() {
               </button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
-                <button 
+                <button
                   key={num}
                   onClick={() => setCurrentPage(num)}
                   style={{
@@ -970,7 +937,7 @@ export default function WorkiezHome() {
                 </button>
               ))}
 
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
                 style={paginationBtnStyle}
@@ -984,14 +951,13 @@ export default function WorkiezHome() {
 
       </div>
 
-      {/* Komponen Modal Form Tambah Lamaran */}
-      <Workiez 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
-        onSuccess={() => fetchApplications()} 
+      <WorkiezModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSuccess={() => fetchApplications()}
       />
 
-      {/* Pop-up Modal Edit Status Minimalis */}
+      {/* Pop-up Modal Edit Status */}
       {editingItem && (
         <div style={modalOverlayStyle}>
           <div style={{ ...modalBoxStyle, maxWidth: '380px', padding: '22px' }}>
@@ -1014,9 +980,9 @@ export default function WorkiezHome() {
                 <label style={formLabelStyle}>Tahapan Seleksi Terbaru</label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <span style={{ position: 'absolute', left: '10px', color: '#64748B', display: 'flex' }}><FiActivity size={13} /></span>
-                  <select 
-                    value={editStatus} 
-                    onChange={(e) => setEditStatus(e.target.value)} 
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
                     style={{ ...formInputStyle, paddingLeft: '30px' }}
                   >
                     <option value="Applied">Applied (Terkirim)</option>
@@ -1033,11 +999,11 @@ export default function WorkiezHome() {
                 <label style={formLabelStyle}>Catatan / Tindak Lanjut</label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <span style={{ position: 'absolute', left: '10px', color: '#64748B', display: 'flex' }}><FiFileText size={13} /></span>
-                  <input 
-                    type="text" 
-                    placeholder="Contoh: Jadwal wawancara tanggal 25" 
-                    value={editCatatan} 
-                    onChange={(e) => setEditCatatan(e.target.value)} 
+                  <input
+                    type="text"
+                    placeholder="Contoh: Jadwal wawancara tanggal 25"
+                    value={editCatatan}
+                    onChange={(e) => setEditCatatan(e.target.value)}
                     style={{ ...formInputStyle, paddingLeft: '30px' }}
                   />
                 </div>
@@ -1061,16 +1027,15 @@ export default function WorkiezHome() {
   );
 }
 
-// Styling Internal Pendukung
 const navIconBtnStyle = {
   background: '#FFFFFF', border: '1px solid #CBD5E1', padding: '6px',
   borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#1E1B4B'
 };
 
 const activeTabBtnStyle = {
-  background: 'linear-gradient(135deg, #2E3192 0%, #1E1B4B 100%)', 
+  background: 'linear-gradient(135deg, #2E3192 0%, #1E1B4B 100%)',
   border: 'none', padding: '5px 12px', borderRadius: '8px',
-  fontSize: '11px', fontWeight: '600', color: '#F59E0B', cursor: 'pointer',
+  fontSize: '11px', fontWeight: '500', color: '#FFFFFF', cursor: 'pointer',
   boxShadow: '0 2px 6px rgba(46, 49, 146, 0.25)', fontFamily: 'Poppins, sans-serif'
 };
 
@@ -1117,12 +1082,12 @@ const modalOverlayStyle = {
 };
 
 const modalBoxStyle = {
-  background: '#FFFFFF', 
-  borderRadius: '20px', 
+  background: '#FFFFFF',
+  borderRadius: '20px',
   padding: '22px',
-  width: '100%', 
+  width: '100%',
   boxShadow: '0 20px 35px -10px rgba(30, 27, 75, 0.2)',
-  fontFamily: 'Poppins, sans-serif', 
+  fontFamily: 'Poppins, sans-serif',
   boxSizing: 'border-box',
   border: '1px solid #E2E8F0'
 };
@@ -1151,7 +1116,7 @@ const modalCancelBtnStyle = {
 };
 
 const modalSubmitBtnStyle = {
-  padding: '8px 16px', background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
+  padding: '8px 16px', background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
   border: 'none', borderRadius: '8px',
   fontSize: '11px', fontWeight: '600', color: '#1E1B4B', cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif', display: 'flex', alignItems: 'center', gap: '6px',

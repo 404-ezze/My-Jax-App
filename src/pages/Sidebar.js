@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  FiX, 
-  FiActivity, 
-  FiSliders, 
-  FiChevronRight
+import {
+  FiX,
+  FiUser,
+  FiSliders,
+  FiChevronRight,
+  FiLogOut,
+  FiShield
 } from 'react-icons/fi';
 
-// --- MINI TILE GRAFIS KHUSUS SIDEBAR (SENADA DASHBOARD) ---
+// --- MINI TILE GRAFIS KHUSUS SIDEBAR (MEMPHIS DUOTONE) ---
 const SidebarDashboardTile = () => (
   <div style={{
     width: '34px',
@@ -101,11 +103,52 @@ const SidebarWorkiezTile = () => (
   </div>
 );
 
-export default function Sidebar({ isOpen, toggleSidebar }) {
+export default function Sidebar({ isOpen, toggleSidebar, onLogout }) {
   const location = useLocation();
   const sidebarWidth = '300px';
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [hoveredSecondaryIdx, setHoveredSecondaryIdx] = useState(null);
+  const [isHoveredLogout, setIsHoveredLogout] = useState(false);
+
+  // Ambil profil pengguna secara dinamis
+  const [userProfile, setUserProfile] = useState({
+    nama: 'User',
+    username: 'user_account',
+    avatar: '',
+    isGoogle: false
+  });
+
+  useEffect(() => {
+    try {
+      const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
+      const isGoogle = authMode === 'google';
+      const gName = localStorage.getItem('jax_user_name');
+      const gEmail = localStorage.getItem('jax_user_email');
+      const gAvatar = localStorage.getItem('jax_user_avatar');
+
+      const saved = localStorage.getItem('myjax_user_profile');
+      let parsed = null;
+      if (saved) {
+        try { parsed = JSON.parse(saved); } catch (e) {}
+      }
+
+      if (isGoogle) {
+        setUserProfile({
+          nama: gName || (parsed && parsed.nama) || 'Pengguna JAX',
+          username: gEmail ? gEmail.split('@')[0] : (parsed && parsed.username) || 'google_user',
+          avatar: gAvatar || '',
+          isGoogle: true
+        });
+      } else {
+        setUserProfile({
+          nama: gName || (parsed && parsed.nama) || 'Tamu',
+          username: 'guest_mode',
+          avatar: '',
+          isGoogle: false
+        });
+      }
+    } catch (e) {}
+  }, [isOpen]);
 
   const menuItems = [
     {
@@ -135,65 +178,82 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   ];
 
   const secondaryItems = [
-    { path: '/history', label: 'Riwayat Log', icon: FiActivity },
-    { path: '/settings', label: 'Pengaturan Sistem', icon: FiSliders }
+    {
+      path: '/profile',
+      label: 'Profil Akun',
+      desc: 'Kredensial & identitas diri',
+      icon: FiUser
+    },
+    {
+      path: '/settings',
+      label: 'Pengaturan & Ekspor',
+      desc: 'Data Vault & konfigurasi sistem',
+      icon: FiSliders
+    }
   ];
+
+  const handleLogoutClick = () => {
+    if (window.confirm('Apakah Anda yakin ingin keluar dari akun?')) {
+      if (toggleSidebar) toggleSidebar();
+      if (onLogout) onLogout();
+    }
+  };
 
   return (
     <>
       {/* Backdrop Glassmorphism Overlay */}
       {isOpen && (
-        <div 
+        <div
           onClick={toggleSidebar}
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            width: '100vw', 
-            height: '100vh', 
-            background: 'rgba(30, 27, 75, 0.45)', 
-            backdropFilter: 'blur(6px)', 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(30, 27, 75, 0.45)',
+            backdropFilter: 'blur(6px)',
             WebkitBackdropFilter: 'blur(6px)',
-            zIndex: 9998, 
-            transition: 'opacity 0.3s ease' 
+            zIndex: 9998,
+            transition: 'opacity 0.3s ease'
           }}
         />
       )}
 
-      {/* Kontainer Sidebar (Clean White) */}
+      {/* Kontainer Sidebar */}
       <aside style={{
-        position: 'fixed', 
-        top: 0, 
-        left: isOpen ? 0 : `-${sidebarWidth}`, 
-        width: sidebarWidth, 
+        position: 'fixed',
+        top: 0,
+        left: isOpen ? 0 : `-${sidebarWidth}`,
+        width: sidebarWidth,
         height: '100vh',
-        background: '#FFFFFF', 
+        background: '#FFFFFF',
         borderRight: '1px solid #E2E8F0',
-        zIndex: 9999, 
-        transition: 'left 0.32s cubic-bezier(0.16, 1, 0.3, 1)', 
-        boxShadow: '15px 0 35px rgba(30, 27, 75, 0.08)', 
-        display: 'flex', 
+        zIndex: 9999,
+        transition: 'left 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: '15px 0 35px rgba(30, 27, 75, 0.08)',
+        display: 'flex',
         flexDirection: 'column',
         boxSizing: 'border-box',
         fontFamily: 'Poppins, sans-serif'
       }}>
-        
+
         {/* Header Sidebar */}
-        <div style={{ 
-          padding: '18px 18px 16px 18px', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          borderBottom: '1px solid #F1F5F9' 
+        <div style={{
+          padding: '18px 18px 16px 18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid #F1F5F9'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img 
-              src="/image/logo_myjax.png" 
-              alt="Logo" 
-              style={{ 
-                width: '36px', 
-                height: '36px', 
-                objectFit: 'contain', 
+            <img
+              src="/image/logo_myjax.png"
+              alt="Logo"
+              style={{
+                width: '36px',
+                height: '36px',
+                objectFit: 'contain',
                 borderRadius: '10px',
                 background: '#F8FAFC',
                 padding: '3px',
@@ -203,34 +263,34 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               onError={(e) => { e.target.style.display = 'none'; }}
             />
             <div>
-              <h3 style={{ margin: 0, color: '#1E1B4B', fontSize: '15px', fontWeight: '600', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
+              <h3 style={{ margin: 0, color: '#1E1B4B', fontSize: '15px', fontWeight: '700', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
                 MY JAX
               </h3>
-              <span style={{ 
-                display: 'inline-flex', 
+              <span style={{
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                marginTop: '3px', 
-                fontSize: '10px', 
-                color: '#64748B', 
+                marginTop: '3px',
+                fontSize: '10px',
+                color: '#64748B',
                 fontWeight: '400',
-                lineHeight: '1.3' 
+                lineHeight: '1.3'
               }}>
-                Productivity & Finance System
+                Personal Life Tracker
               </span>
             </div>
           </div>
 
-          <button 
-            onClick={toggleSidebar} 
-            style={{ 
-              background: '#F8FAFC', 
-              border: '1px solid #E2E8F0', 
-              cursor: 'pointer', 
-              padding: '6px', 
-              display: 'flex', 
+          <button
+            onClick={toggleSidebar}
+            style={{
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
               alignItems: 'center',
-              borderRadius: '8px', 
+              borderRadius: '8px',
               color: '#64748B',
               flexShrink: 0,
               transition: 'all 0.2s ease'
@@ -242,9 +302,9 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           </button>
         </div>
 
-        {/* Menu Navigasi Utama */}
+        {/* Navigasi Modul & Preferensi */}
         <div style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto' }}>
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
             Modul Utama
           </span>
 
@@ -254,9 +314,9 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             const TileComp = item.TileComponent;
 
             return (
-              <Link 
+              <Link
                 key={idx}
-                to={item.path} 
+                to={item.path}
                 onClick={toggleSidebar}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
@@ -276,10 +336,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <TileComp />
                   <div>
-                    <div style={{ 
-                      fontSize: '13px', 
-                      fontWeight: isActive ? '600' : '500', 
-                      color: isActive ? '#2E3192' : '#1E293B' 
+                    <div style={{
+                      fontSize: '13px',
+                      fontWeight: isActive ? '600' : '500',
+                      color: isActive ? '#2E3192' : '#1E293B'
                     }}>
                       {item.label}
                     </div>
@@ -290,10 +350,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 </div>
 
                 {(isActive || isHovered) && (
-                  <FiChevronRight 
-                    size={14} 
-                    color={isActive ? '#F59E0B' : '#94A3B8'} 
-                    style={{ transform: isHovered ? 'translateX(2px)' : 'none', transition: 'transform 0.2s ease' }} 
+                  <FiChevronRight
+                    size={14}
+                    color={isActive ? '#F59E0B' : '#94A3B8'}
+                    style={{ transform: isHovered ? 'translateX(2px)' : 'none', transition: 'transform 0.2s ease' }}
                   />
                 )}
               </Link>
@@ -302,8 +362,8 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
 
           <div style={{ borderTop: '1px solid #F1F5F9', margin: '14px 0 10px 0' }} />
 
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
-            Preferensi
+          <span style={{ fontSize: '10px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', paddingLeft: '8px', marginBottom: '4px' }}>
+            Preferensi & Akun
           </span>
 
           {secondaryItems.map((item, idx) => {
@@ -312,39 +372,197 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             const Icon = item.icon;
 
             return (
-              <Link 
+              <Link
                 key={idx}
-                to={item.path} 
-                onClick={toggleSidebar} 
+                to={item.path}
+                onClick={toggleSidebar}
                 onMouseEnter={() => setHoveredSecondaryIdx(idx)}
                 onMouseLeave={() => setHoveredSecondaryIdx(null)}
                 style={{
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
+                  justifyContent: 'space-between',
                   padding: '9px 12px',
                   borderRadius: '10px',
                   color: isActive ? '#2E3192' : isHovered ? '#1E293B' : '#64748B',
                   background: isActive ? 'rgba(46, 49, 146, 0.06)' : isHovered ? '#F8FAFC' : 'transparent',
                   border: isActive ? '1px solid rgba(46, 49, 146, 0.15)' : '1px solid transparent',
                   transform: isHovered && !isActive ? 'translateX(3px)' : 'none',
-                  fontSize: '12px',
-                  fontWeight: isActive ? '600' : '500',
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Icon size={15} color={isActive ? '#2E3192' : isHovered ? '#334155' : '#94A3B8'} />
-                <span>{item.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '8px',
+                    background: isActive ? '#2E3192' : '#F1F5F9',
+                    color: isActive ? '#FFFFFF' : '#64748B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <Icon size={14} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: isActive ? '600' : '500', color: isActive ? '#2E3192' : '#1E293B' }}>
+                      {item.label}
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: '#94A3B8' }}>
+                      {item.desc}
+                    </div>
+                  </div>
+                </div>
+
+                <FiChevronRight
+                  size={13}
+                  color={isActive ? '#2E3192' : '#CBD5E1'}
+                />
               </Link>
             );
           })}
         </div>
 
-        {/* Footer Sidebar */}
-        <div style={{ padding: '14px 18px', borderTop: '1px solid #F1F5F9', textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: '11px', fontWeight: '500', color: '#94A3B8', letterSpacing: '0.3px' }}>
-            © 2026, Eze. All rights reserved.
+        {/* Footer Sidebar: Kartu Akun Aktif & Tombol Keluar */}
+        <div style={{
+          padding: '14px 16px',
+          borderTop: '1px solid #F1F5F9',
+          background: '#FAFAFD',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}>
+          {/* Mini Card Pengguna Aktif */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 10px',
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderRadius: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              {userProfile.avatar ? (
+                <img
+                  src={userProfile.avatar}
+                  alt={userProfile.nama}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '10px',
+                    objectFit: 'cover',
+                    flexShrink: 0
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {(userProfile.nama || 'U').charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#1E1B4B',
+                  lineHeight: '1.2',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {userProfile.nama}
+                </div>
+                <div style={{
+                  fontSize: '10px',
+                  color: '#64748B',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  @{userProfile.username}
+                </div>
+              </div>
+            </div>
+
+            <span style={{
+              background: userProfile.isGoogle ? '#DCFCE7' : '#FEF3C7',
+              color: userProfile.isGoogle ? '#15803D' : '#D97706',
+              padding: '2px 6px',
+              borderRadius: '6px',
+              fontSize: '9px',
+              fontWeight: '700',
+              flexShrink: 0
+            }}>
+              {userProfile.isGoogle ? 'ONLINE' : 'TAMU'}
+            </span>
+          </div>
+
+          {/* Tombol Logout Elegan */}
+          <button
+            type="button"
+            onClick={handleLogoutClick}
+            onMouseEnter={() => setIsHoveredLogout(true)}
+            onMouseLeave={() => setIsHoveredLogout(false)}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 12px',
+              background: isHoveredLogout ? 'rgba(239, 68, 68, 0.08)' : 'transparent',
+              border: isHoveredLogout ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid transparent',
+              borderRadius: '10px',
+              color: isHoveredLogout ? '#DC2626' : '#64748B',
+              fontSize: '11.5px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              fontFamily: 'Poppins, sans-serif',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '7px',
+                background: isHoveredLogout ? '#FEE2E2' : '#F1F5F9',
+                color: isHoveredLogout ? '#DC2626' : '#64748B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
+              }}>
+                <FiLogOut size={13} />
+              </div>
+              <span>Keluar dari Akun</span>
+            </div>
+
+            <FiChevronRight
+              size={13}
+              color={isHoveredLogout ? '#DC2626' : '#94A3B8'}
+              style={{
+                transform: isHoveredLogout ? 'translateX(2px)' : 'none',
+                transition: 'transform 0.2s ease'
+              }}
+            />
+          </button>
+
+          <p style={{ margin: '2px 0 0 0', fontSize: '10px', fontWeight: '500', color: '#94A3B8', textAlign: 'center', letterSpacing: '0.2px' }}>
+            © 2026 MY JAX System
           </p>
         </div>
 

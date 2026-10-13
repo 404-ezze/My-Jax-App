@@ -62,7 +62,6 @@ body {
   gap: 16px;
 }
 
-/* --- Penataan Khusus Layar Seluler (< 768px) --- */
 @media (max-width: 768px) {
   .dashboard-page-container {
     padding: 6px 14px 115px 14px;
@@ -90,7 +89,6 @@ body {
   }
 }
 
-/* --- Penataan Desktop (> 769px) --- */
 @media (min-width: 769px) {
   .mobile-cards-view {
     display: none !important;

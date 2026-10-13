@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { API_URL } from '../App';
-import { 
-  FiX, 
-  FiMic, 
-  FiCheck, 
-  FiCheckCircle, 
-  FiRotateCcw, 
+import {
+  FiX,
+  FiMic,
+  FiCheck,
+  FiCheckCircle,
+  FiRotateCcw,
   FiLoader
 } from 'react-icons/fi';
+import { appendRowToSheet } from '../../utils/GoogleStorage';
 
-export default function Workiez({ isOpen, onClose, onSuccess }) {
+export default function WorkiezModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     tanggal: new Date().toISOString().split('T')[0],
     perusahaan: '',
@@ -45,43 +45,40 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
     setFormError('');
     setFormSubmitting(true);
 
-    const payload = {
-      sheetName: 'Workiez',
-      rowData: [
-        `WRK-${Date.now()}`,
-        formData.tanggal,
-        formData.perusahaan,
-        formData.posisi,
-        formData.linkLoker || '-',
-        formData.status,
-        formData.catatan || '-'
-      ]
-    };
+    const authMode = localStorage.getItem('jax_auth_mode') || 'guest';
+    const newId = `WRK-${Date.now()}`;
+    const newRow = [
+      newId,
+      formData.tanggal,
+      formData.perusahaan,
+      formData.posisi,
+      formData.linkLoker || '-',
+      formData.status,
+      formData.catatan || '-'
+    ];
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-      if (result.status === 'success') {
-        setShowSuccessModal(true);
-        setFormData({
-          tanggal: new Date().toISOString().split('T')[0],
-          perusahaan: '',
-          posisi: '',
-          linkLoker: '',
-          status: 'Applied',
-          catatan: ''
-        });
-        if (onSuccess) onSuccess();
+      if (authMode === 'google') {
+        await appendRowToSheet('Workiez', newRow);
+        const existing = JSON.parse(localStorage.getItem('jax_cache_workiez') || '[]');
+        localStorage.setItem('jax_cache_workiez', JSON.stringify([newRow, ...existing]));
       } else {
-        alert('Gagal mencatat lamaran: ' + result.message);
+        const guestWorkiez = JSON.parse(localStorage.getItem('jax_guest_workiez') || '[]');
+        localStorage.setItem('jax_guest_workiez', JSON.stringify([newRow, ...guestWorkiez]));
       }
+
+      setShowSuccessModal(true);
+      setFormData({
+        tanggal: new Date().toISOString().split('T')[0],
+        perusahaan: '',
+        posisi: '',
+        linkLoker: '',
+        status: 'Applied',
+        catatan: ''
+      });
+      if (onSuccess) onSuccess();
     } catch (error) {
-      alert('Kendala jaringan: ' + error.message);
+      alert('Kendala penyimpanan: ' + error.message);
     } finally {
       setFormSubmitting(false);
     }
@@ -181,11 +178,8 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
 
   return (
     <>
-      {/* Modal Form Tambah Lamaran Minimalis */}
       <div style={modalOverlayStyle}>
         <div style={{ ...modalBoxStyle, maxWidth: '440px' }}>
-          
-          {/* Header Modal */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
               <div style={{
@@ -211,8 +205,8 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => { setRecognizedText(''); setShowVoiceModal(true); }}
                 style={{
                   background: 'rgba(245, 158, 11, 0.15)',
@@ -246,45 +240,43 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Nama Perusahaan & Posisi */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
               <div>
                 <label style={formLabelStyle}>Perusahaan *</label>
-                <input 
-                  type="text" 
-                  name="perusahaan" 
-                  placeholder="Misal: Pelindo" 
-                  value={formData.perusahaan} 
-                  onChange={handleChange} 
-                  style={{ ...formInputStyle, fontWeight: '700' }} 
+                <input
+                  type="text"
+                  name="perusahaan"
+                  placeholder="Misal: Pelindo"
+                  value={formData.perusahaan}
+                  onChange={handleChange}
+                  style={{ ...formInputStyle, fontWeight: '700' }}
                   required
                 />
               </div>
 
               <div>
                 <label style={formLabelStyle}>Posisi / Role *</label>
-                <input 
-                  type="text" 
-                  name="posisi" 
-                  placeholder="Misal: IT Staff" 
-                  value={formData.posisi} 
-                  onChange={handleChange} 
-                  style={{ ...formInputStyle, fontWeight: '700' }} 
+                <input
+                  type="text"
+                  name="posisi"
+                  placeholder="Misal: IT Staff"
+                  value={formData.posisi}
+                  onChange={handleChange}
+                  style={{ ...formInputStyle, fontWeight: '700' }}
                   required
                 />
               </div>
             </div>
 
-            {/* Tanggal Apply & Status Awal */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
               <div>
                 <label style={formLabelStyle}>Tanggal Apply *</label>
-                <input 
-                  type="date" 
-                  name="tanggal" 
-                  value={formData.tanggal} 
-                  onChange={handleChange} 
-                  style={formInputStyle} 
+                <input
+                  type="date"
+                  name="tanggal"
+                  value={formData.tanggal}
+                  onChange={handleChange}
+                  style={formInputStyle}
                   required
                 />
               </div>
@@ -302,33 +294,30 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
               </div>
             </div>
 
-            {/* Link Lowongan */}
             <div style={{ marginBottom: '14px' }}>
               <label style={formLabelStyle}>Tautan Lowongan (Opsional)</label>
-              <input 
-                type="text" 
-                name="linkLoker" 
-                placeholder="Contoh: linkedin.com/jobs/..." 
-                value={formData.linkLoker} 
-                onChange={handleChange} 
-                style={formInputStyle} 
+              <input
+                type="text"
+                name="linkLoker"
+                placeholder="Contoh: linkedin.com/jobs/..."
+                value={formData.linkLoker}
+                onChange={handleChange}
+                style={formInputStyle}
               />
             </div>
 
-            {/* Catatan Tambahan */}
             <div style={{ marginBottom: '18px' }}>
               <label style={formLabelStyle}>Catatan (Opsional)</label>
-              <input 
-                type="text" 
-                name="catatan" 
-                placeholder="Contoh: Melalui portal karir perusahaan" 
-                value={formData.catatan} 
-                onChange={handleChange} 
-                style={formInputStyle} 
+              <input
+                type="text"
+                name="catatan"
+                placeholder="Contoh: Melalui portal karir perusahaan"
+                value={formData.catatan}
+                onChange={handleChange}
+                style={formInputStyle}
               />
             </div>
 
-            {/* Tombol Aksi */}
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
               <button type="button" onClick={onClose} style={modalCancelBtnStyle}>
                 Batal
@@ -358,26 +347,26 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
             <p style={{ margin: '0 0 14px 0', fontSize: '11px', color: '#64748B' }}>{voiceStatus}</p>
 
             <div style={{ marginBottom: '14px', display: 'flex', justifyContent: 'center' }}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onMouseDown={startHoldingRecord}
                 onMouseUp={stopHoldingRecord}
                 onTouchStart={startHoldingRecord}
                 onTouchEnd={stopHoldingRecord}
-                style={{ 
-                  background: isRecording ? '#DC2626' : 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)', 
-                  color: isRecording ? '#FFFFFF' : '#F59E0B', 
-                  border: isRecording ? 'none' : '1px solid rgba(245, 158, 11, 0.4)', 
-                  padding: '10px 20px', 
-                  borderRadius: '12px', 
-                  fontSize: '12px', 
-                  fontWeight: '600', 
-                  cursor: 'pointer', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                style={{
+                  background: isRecording ? '#DC2626' : 'linear-gradient(135deg, #1E1B4B 0%, #2E3192 100%)',
+                  color: isRecording ? '#FFFFFF' : '#F59E0B',
+                  border: isRecording ? 'none' : '1px solid rgba(245, 158, 11, 0.4)',
+                  padding: '10px 20px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '6px',
-                  userSelect: 'none', 
-                  WebkitUserSelect: 'none', 
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
                   fontFamily: 'Poppins, sans-serif',
                   boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)'
                 }}
@@ -411,7 +400,7 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
             <div style={{ display: 'inline-flex', background: '#DCFCE7', color: '#16A34A', padding: '10px', borderRadius: '50%', marginBottom: '10px' }}>
               <FiCheckCircle size={26} />
             </div>
-            
+
             <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '600', color: '#1E1B4B' }}>
               Lamaran Tersimpan
             </h4>
@@ -420,18 +409,18 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
-              <img 
-                src="/image/successjax.png" 
-                alt="Sukses" 
-                style={{ maxWidth: '100%', maxHeight: '130px', objectFit: 'contain', borderRadius: '10px' }} 
+              <img
+                src="/image/successjax.png"
+                alt="Sukses"
+                style={{ maxWidth: '100%', maxHeight: '130px', objectFit: 'contain', borderRadius: '10px' }}
               />
             </div>
 
-            <button 
+            <button
               onClick={() => {
                 setShowSuccessModal(false);
                 onClose();
-              }} 
+              }}
               style={{ ...modalSubmitBtnStyle, width: '100%', justifyContent: 'center', padding: '9px 16px' }}
             >
               Selesai
@@ -443,93 +432,92 @@ export default function Workiez({ isOpen, onClose, onSuccess }) {
   );
 }
 
-// Styling Terintegrasi & Minimalis (Tema Ungu & Kuning)
 const modalOverlayStyle = {
-  position: 'fixed', 
-  top: 0, 
-  left: 0, 
-  width: '100vw', 
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100vw',
   height: '100vh',
-  background: 'rgba(30, 27, 75, 0.55)', 
+  background: 'rgba(30, 27, 75, 0.55)',
   backdropFilter: 'blur(8px)',
   WebkitBackdropFilter: 'blur(8px)',
-  display: 'flex', 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  zIndex: 9999, 
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
   padding: '16px'
 };
 
 const modalBoxStyle = {
-  background: '#FFFFFF', 
-  borderRadius: '20px', 
+  background: '#FFFFFF',
+  borderRadius: '20px',
   padding: '22px',
-  width: '100%', 
+  width: '100%',
   boxShadow: '0 20px 35px -10px rgba(30, 27, 75, 0.25)',
-  fontFamily: 'Poppins, sans-serif', 
+  fontFamily: 'Poppins, sans-serif',
   boxSizing: 'border-box',
   border: '1px solid #E2E8F0'
 };
 
 const iconCloseBtnStyle = {
-  background: '#F8FAFC', 
-  border: '1px solid #E2E8F0', 
+  background: '#F8FAFC',
+  border: '1px solid #E2E8F0',
   cursor: 'pointer',
-  padding: '6px', 
-  display: 'flex', 
-  alignItems: 'center', 
-  borderRadius: '8px', 
+  padding: '6px',
+  display: 'flex',
+  alignItems: 'center',
+  borderRadius: '8px',
   color: '#64748B'
 };
 
 const formLabelStyle = {
-  display: 'block', 
-  fontSize: '10px', 
+  display: 'block',
+  fontSize: '10px',
   fontWeight: '600',
-  color: '#1E1B4B', 
-  marginBottom: '4px', 
-  textTransform: 'uppercase', 
+  color: '#1E1B4B',
+  marginBottom: '4px',
+  textTransform: 'uppercase',
   letterSpacing: '0.3px'
 };
 
 const formInputStyle = {
-  width: '100%', 
-  padding: '8px 10px', 
+  width: '100%',
+  padding: '8px 10px',
   borderRadius: '8px',
-  border: '1px solid #CBD5E1', 
-  fontSize: '12px', 
+  border: '1px solid #CBD5E1',
+  fontSize: '12px',
   outline: 'none',
-  boxSizing: 'border-box', 
-  fontFamily: 'Poppins, sans-serif', 
-  background: '#F8FAFC', 
+  boxSizing: 'border-box',
+  fontFamily: 'Poppins, sans-serif',
+  background: '#F8FAFC',
   color: '#1E293B',
   fontWeight: '500'
 };
 
 const modalCancelBtnStyle = {
-  padding: '8px 14px', 
-  background: '#F1F5F9', 
-  border: 'none', 
+  padding: '8px 14px',
+  background: '#F1F5F9',
+  border: 'none',
   borderRadius: '8px',
-  fontSize: '11px', 
-  fontWeight: '500', 
-  color: '#475569', 
+  fontSize: '11px',
+  fontWeight: '500',
+  color: '#475569',
   cursor: 'pointer',
   fontFamily: 'Poppins, sans-serif'
 };
 
 const modalSubmitBtnStyle = {
-  padding: '8px 16px', 
-  background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', 
-  border: 'none', 
+  padding: '8px 16px',
+  background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
+  border: 'none',
   borderRadius: '8px',
-  fontSize: '11px', 
-  fontWeight: '600', 
-  color: '#1E1B4B', 
+  fontSize: '11px',
+  fontWeight: '600',
+  color: '#1E1B4B',
   cursor: 'pointer',
-  fontFamily: 'Poppins, sans-serif', 
-  display: 'flex', 
-  alignItems: 'center', 
+  fontFamily: 'Poppins, sans-serif',
+  display: 'flex',
+  alignItems: 'center',
   gap: '6px',
   boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)'
 };
